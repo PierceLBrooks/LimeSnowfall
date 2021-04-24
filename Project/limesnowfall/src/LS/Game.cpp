@@ -1,18 +1,19 @@
 
 // Author: Pierce Brooks
 
-#include <SFML/Window/Mouse.hpp>
+#include <SFML3D/Window/Mouse.hpp>
 #include <LS/LimeSnowfall.hpp>
 #include <LS/Game.hpp>
 #include <iostream>
 
 #define PI (22.0f/7.0f)
 
-LS::Game::Game(const sf::Vector2u& size)
+LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
 {
     pi = PI;
+    this->output = output;
     window = nullptr;
-    player = new Player(this, sf::Vector2u(1, 1));
+    player = new Player(this, sf3d::Vector2u(1, 1));
 }
 
 LS::Game::~Game()
@@ -38,22 +39,23 @@ bool LS::Game::shoot()
     }
     if (player->shoot())
     {
-        sf::Color color = level->invert(getFloorColor());
-        sf::Vector2f position = level->multiply(sf::Vector2f(player->getPosition()), level->getUnitSize());
-        sf::Vector2f mouse = sf::Vector2f(sf::Mouse::getPosition(*window))+(window->getView().getCenter()-(window->getView().getSize()*0.5f));
-        float direction = level->direction(position, mouse);
-        color.a = 255;
-        bullets.push_back(new Bullet(this, bulletTexture, position, sf::Vector2f(cosf(direction), sinf(direction))*level->distance(position, mouse), direction*(180.0f/pi)));
-        bullets.back()->setColor(color);
+        sf3d::Vector3f center = window->getView().getCenter();
+        sf3d::Color color = sf3d::Color::White;
+        sf3d::Vector2f mouse = sf3d::Vector2f(sf3d::Mouse::getPosition(*output))+(sf3d::Vector2f(center.x, center.y)-(window->getView().getSize()*0.5f));
         return true;
     }
     return false;
 }
 
-bool LS::Game::movePlayer(const sf::Vector2i& movement)
+bool LS::Game::movePlayer(const sf3d::Vector2i& movement)
 {
     player->move(movement);
     return true;
+}
+
+void LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
+{
+    this->window = window;
 }
 
 LS::Player* LS::Game::getPlayer() const

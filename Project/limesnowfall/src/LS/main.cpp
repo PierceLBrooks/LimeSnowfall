@@ -3,51 +3,54 @@
 
 #include <LS/LimeSnowfall.hpp>
 #include <iostream>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/Keyboard.hpp>
+#include <SFML3D/Graphics/RenderTexture.hpp>
+#include <SFML3D/Graphics/RenderWindow.hpp>
+#include <SFML3D/Window/Event.hpp>
+#include <SFML3D/Window/Mouse.hpp>
+#include <SFML3D/Window/Keyboard.hpp>
 
 typedef LS::LimeSnowfall Application;
 
-void report(const sf::Vector2f& target)
+void report(const sf3d::Vector2f& target)
 {
     std::cout << target.x << "  " << target.y << std::endl;
 }
 
 int main(int argc, char** argv)
 {
-    sf::Vector2f center;
+    sf3d::Vector2f center;
     float deltaTime;
-    Application* application = new Application();
-    sf::Clock* clock = new sf::Clock();
-    sf::RenderWindow* window = new sf::RenderWindow();
-    auto resolutions = sf::VideoMode::getFullscreenModes();
+    sf3d::Clock* clock = new sf3d::Clock();
+    sf3d::RenderWindow* window = new sf3d::RenderWindow();
+    sf3d::RenderTexture* output = new sf3d::RenderTexture();
+    Application* application = new Application(window);
+    auto resolutions = sf3d::VideoMode::getFullscreenModes();
     window->create(resolutions[resolutions.size()/2], "Lime Snowfall");
+    output->create(window->getSize().x, window->getSize().y);
     clock->restart();
     while (window->isOpen())
     {
-        sf::Event event;
+        sf3d::Event event;
         while (window->pollEvent(event))
         {
             switch (event.type)
             {
-                case sf::Event::Closed:
+                case sf3d::Event::Closed:
                     window->close();
                     break;
             }
         }
         //report(center);
-        window->clear(sf::Color::Black);
-        window->setView(sf::View(center, sf::Vector2f(window->getSize())));
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+        window->clear(sf3d::Color::Black);
+        window->setView(sf3d::View(center, sf3d::Vector2f(window->getSize())));
+        if (sf3d::Mouse::isButtonPressed(sf3d::Mouse::Button::Left))
         {
             application->act(LS::Game::Action::SHOOT);
         }
         deltaTime = clock->restart().asSeconds();
-        application->update(window, deltaTime, sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M));
+        application->update(output, deltaTime);
         window->display();
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Escape))
         {
             window->close();
         }

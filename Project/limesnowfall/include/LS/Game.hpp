@@ -6,10 +6,11 @@
 
 #include <vector>
 #include <LS/Player.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Image.hpp>
+#include <SFML3D/Graphics/RenderTexture.hpp>
+#include <SFML3D/Graphics/RenderWindow.hpp>
+#include <SFML3D/Graphics/Texture.hpp>
+#include <SFML3D/Graphics/Sprite.hpp>
+#include <SFML3D/Graphics/Image.hpp>
 
 namespace LS
 {
@@ -21,14 +22,14 @@ namespace LS
                 NONE,
                 SHOOT
             };
-            Game(const sf::Vector2u& size);
+            Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size);
             virtual ~Game();
             bool act(Action action);
             bool shoot();
-            bool movePlayer(const sf::Vector2i& movement);
-            void update(sf::RenderWindow* window, float deltaTime, bool mapView);
+            bool movePlayer(const sf3d::Vector2i& movement);
+            void update(sf3d::RenderTexture* window, float deltaTime);
             Player* getPlayer() const;
-            sf::Vector2f getPlayerPosition() const;
+            sf3d::Vector2f getPlayerPosition() const;
         protected:
             float pi;
             float turn;
@@ -36,7 +37,8 @@ namespace LS
             unsigned int room;
             unsigned int score;
             Player* player;
-            sf::RenderWindow* window;
+            sf3d::RenderWindow* output;
+            sf3d::RenderTexture* window;
     };
 }
 

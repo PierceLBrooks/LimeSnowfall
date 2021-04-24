@@ -5,9 +5,9 @@
 #define LS_PLAYER_HPP
 
 #include <LS/Ownable.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Sprite.hpp>
+#include <SFML3D/System/Vector2.hpp>
+#include <SFML3D/Graphics/Texture.hpp>
+#include <SFML3D/Graphics/Sprite.hpp>
 
 namespace LS
 {
@@ -16,19 +16,19 @@ namespace LS
     class Player : public Ownable<Game*>
     {
         public:
-            Player(Game* owner, const sf::Vector2u& position);
+            Player(Game* owner, const sf3d::Vector2u& position);
             virtual ~Player();
             bool shoot();
-            void move(const sf::Vector2i& movement);
+            void move(const sf3d::Vector2i& movement);
             Game* getOwner() const;
-            sf::Sprite* getSprite() const;
-            const sf::Vector2u& getPosition() const;
-            void setPosition(const sf::Vector2u& position);
+            sf3d::Sprite* getSprite() const;
+            const sf3d::Vector2u& getPosition() const;
+            void setPosition(const sf3d::Vector2u& position);
         private:
             Game* owner;
-            sf::Texture* texture;
-            sf::Sprite* sprite;
-            sf::Vector2u position;
+            sf3d::Texture* texture;
+            sf3d::Sprite* sprite;
+            sf3d::Vector2u position;
     };
 }
 
