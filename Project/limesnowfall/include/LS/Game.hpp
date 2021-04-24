@@ -5,12 +5,17 @@
 #define LS_GAME_HPP
 
 #include <vector>
+#include <LS/Object.hpp>
 #include <LS/Player.hpp>
 #include <SFML3D/Graphics/RenderTexture.hpp>
 #include <SFML3D/Graphics/RenderWindow.hpp>
 #include <SFML3D/Graphics/Texture.hpp>
 #include <SFML3D/Graphics/Sprite.hpp>
 #include <SFML3D/Graphics/Image.hpp>
+#include <SFML3D/Graphics/Camera.hpp>
+#include <SFML3D/Graphics/Light.hpp>
+#include <SFML3D/Graphics/Cuboid.hpp>
+#include <SFML3D/Graphics/Billboard.hpp>
 
 namespace LS
 {
@@ -20,7 +25,9 @@ namespace LS
             enum Action
             {
                 NONE,
-                SHOOT
+                SHOOT,
+                MOVE_LEFT,
+                MOVE_RIGHT
             };
             Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size);
             virtual ~Game();
@@ -28,17 +35,25 @@ namespace LS
             bool shoot();
             bool movePlayer(const sf3d::Vector2i& movement);
             void update(sf3d::RenderTexture* window, float deltaTime);
+            sf3d::RenderWindow* getWindow() const;
             Player* getPlayer() const;
             sf3d::Vector2f getPlayerPosition() const;
         protected:
             float pi;
             float turn;
-            int floor;
-            unsigned int room;
-            unsigned int score;
             Player* player;
             sf3d::RenderWindow* output;
             sf3d::RenderTexture* window;
+            sf3d::Camera* camera;
+            sf3d::Light* light;
+            sf3d::Cuboid* axisX;
+            sf3d::Cuboid* axisY;
+            sf3d::Cuboid* axisZ;
+            sf3d::Billboard* frame;
+            sf3d::RenderTexture* scene;
+            Object* shaftBottom;
+            Object* shaftTop;
+            sf3d::View view;
     };
 }
 

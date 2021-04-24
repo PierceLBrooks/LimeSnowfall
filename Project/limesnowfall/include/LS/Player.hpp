@@ -6,6 +6,7 @@
 
 #include <LS/Ownable.hpp>
 #include <SFML3D/System/Vector2.hpp>
+#include <SFML3D/Graphics/Image.hpp>
 #include <SFML3D/Graphics/Texture.hpp>
 #include <SFML3D/Graphics/Sprite.hpp>
 
@@ -16,19 +17,26 @@ namespace LS
     class Player : public Ownable<Game*>
     {
         public:
-            Player(Game* owner, const sf3d::Vector2u& position);
+            Player(Game* owner);
             virtual ~Player();
             bool shoot();
             void move(const sf3d::Vector2i& movement);
             Game* getOwner() const;
             sf3d::Sprite* getSprite() const;
-            const sf3d::Vector2u& getPosition() const;
-            void setPosition(const sf3d::Vector2u& position);
+            void update(sf3d::RenderTexture* window, float deltaTime);
         private:
             Game* owner;
-            sf3d::Texture* texture;
+            sf3d::Image* imageLeft;
+            sf3d::Image* imageRight;
+            sf3d::Texture* textureLeft;
+            sf3d::Texture* textureRight;
             sf3d::Sprite* sprite;
-            sf3d::Vector2u position;
+            sf3d::Vector2i movement;
+            sf3d::Vector2i animationSize;
+            std::vector<std::vector<sf3d::Vector2i>> animations;
+            float animation;
+            unsigned int animationIndex;
+            int facing;
     };
 }
 
