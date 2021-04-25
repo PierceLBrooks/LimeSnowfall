@@ -19,6 +19,7 @@
 #include <SFML3D/Graphics/Cuboid.hpp>
 #include <SFML3D/Graphics/SphericalPolyhedron.hpp>
 #include <SFML3D/Graphics/Billboard.hpp>
+#include <SFML3D/Audio/SoundBuffer.hpp>
 
 #define PI (22.0f/7.0f)
 
@@ -86,6 +87,7 @@ namespace LS
             sf3d::View view;
             std::vector<Bullet*> bullets;
             std::vector<Enemy*> enemies;
+            std::vector<sf3d::SoundBuffer*> enemySoundBuffers;
     };
 }
 

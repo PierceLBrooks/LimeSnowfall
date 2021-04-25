@@ -5,7 +5,7 @@
 #include <LS/Game.hpp>
 #include <iostream>
 
-LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, int facing, const sf3d::Vector3f& scale) :
+LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, int facing, const sf3d::Vector3f& scale, const std::vector<sf3d::SoundBuffer*>& soundBuffers) :
     Ownable<Game*>(),
     Shooter(),
     owner(owner),
@@ -22,15 +22,25 @@ LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, in
     sprite->setScale(scale);
     sprite->move(sf3d::Vector3f(0.0f, -static_cast<float>(texture->getSize().y)*scale.y*2.0f, 0.0f));
     rope = new sf3d::RectangleShape();
-    rope->setFillColor(sf3d::Color::White);
+    rope->setFillColor(sf3d::Color(128, 128, 128));
     rope->setSize(sf3d::Vector3f(5.0f, 5000.0f, 5.0f));
     rope->setOrigin(rope->getSize()*0.5f);
+    for (unsigned int i = 0; i != soundBuffers.size(); ++i)
+    {
+        sounds.push_back(new sf3d::Sound());
+        sounds.back()->setBuffer(*soundBuffers[i]);
+    }
 }
 
 LS::Enemy::~Enemy()
 {
     delete sprite;
     delete rope;
+    for (unsigned int i = 0; i != sounds.size(); ++i)
+    {
+        delete sounds[i];
+    }
+    sounds.clear();
 }
 
 LS::Game* LS::Enemy::getOwner() const
@@ -51,19 +61,19 @@ bool LS::Enemy::hurt(Bullet* bullet)
         return false;
     }
     --health;
+    if (health <= 0)
+    {
+        sounds[2]->play();
+    }
+    else
+    {
+        sounds[1]->play();
+    }
     return true;
 }
 
 bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* player)
 {
-    if (health <= 0)
-    {
-        life += deltaTime;
-        if ((sprite->getPosition().y > goal*5.0f) || (life > 15.0f))
-        {
-            return false;
-        }
-    }
     if (sprite->getPosition().y < goal)
     {
         sprite->move(sf3d::Vector3f(0.0f, deltaTime*sprite->getScale().y*static_cast<float>(sprite->getTexture()->getSize().y)*0.5f, 0.0f));
@@ -73,6 +83,11 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
         if (health <= 0)
         {
             sprite->move(sf3d::Vector3f(0.0f, deltaTime*sprite->getScale().y*static_cast<float>(sprite->getTexture()->getSize().y)*5.0f, 0.0f));
+            life += deltaTime;
+            if ((sprite->getPosition().y > goal*50.0f) || (life > 15.0f))
+            {
+                return false;
+            }
         }
         else
         {

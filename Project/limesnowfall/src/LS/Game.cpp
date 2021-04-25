@@ -16,6 +16,13 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     player = new Player(this);
     camera = new sf3d::Camera(75.0f, 0.001f, 1000.0f);
 
+    enemySoundBuffers.push_back(new sf3d::SoundBuffer());
+    enemySoundBuffers.back()->loadFromFile("./Assets/shots.wav");
+    enemySoundBuffers.push_back(new sf3d::SoundBuffer());
+    enemySoundBuffers.back()->loadFromFile("./Assets/specops_hurt.wav");
+    enemySoundBuffers.push_back(new sf3d::SoundBuffer());
+    enemySoundBuffers.back()->loadFromFile("./Assets/specops_die.wav");
+
     enemyImageLeft = new sf3d::Image();
     enemyImageLeft->loadFromFile("./Assets/specops.png");
     enemyImageLeft->flipHorizontally();
@@ -176,6 +183,11 @@ LS::Game::~Game()
         delete enemies[i];
     }
     enemies.clear();
+    for (unsigned int i = 0; i != enemySoundBuffers.size(); ++i)
+    {
+        delete enemySoundBuffers[i];
+    }
+    enemySoundBuffers.clear();
     delete shaftTop;
     delete shaftBottom;
     delete axisX;
@@ -353,11 +365,11 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
             spawnLast = life;
             if (sinf(life*pi) > 0.0f)
             {
-                enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, -1, player->getScale()));
+                enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, -1, player->getScale(), enemySoundBuffers));
             }
             else
             {
-                enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, 1, player->getScale()));
+                enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, 1, player->getScale(), enemySoundBuffers));
             }
         }
         else
@@ -367,11 +379,11 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
                 spawnLast = life;
                 if (sinf(life*pi) > 0.0f)
                 {
-                    enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, -1, player->getScale()));
+                    enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, -1, player->getScale(), enemySoundBuffers));
                 }
                 else
                 {
-                    enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, 1, player->getScale()));
+                    enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, 1, player->getScale(), enemySoundBuffers));
                 }
             }
         }

@@ -4,6 +4,7 @@
 #ifndef LS_ENEMY_HPP
 #define LS_ENEMY_HPP
 
+#include <vector>
 #include <LS/Player.hpp>
 #include <LS/Ownable.hpp>
 #include <LS/Shooter.hpp>
@@ -11,6 +12,7 @@
 #include <SFML3D/Graphics/Texture.hpp>
 #include <SFML3D/Graphics/Sprite.hpp>
 #include <SFML3D/Graphics/RectangleShape.hpp>
+#include <SFML3D/Audio/Sound.hpp>
 
 namespace LS
 {
@@ -19,7 +21,7 @@ namespace LS
     class Enemy : public Ownable<Game*>, public Shooter
     {
         public:
-            Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, int facing, const sf3d::Vector3f& scale);
+            Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, int facing, const sf3d::Vector3f& scale, const std::vector<sf3d::SoundBuffer*>& soundBuffers);
             virtual ~Enemy();
             Game* getOwner() const;
             bool hurt(Bullet* bullet);
@@ -36,6 +38,7 @@ namespace LS
             float aim;
             sf3d::Sprite* sprite;
             sf3d::RectangleShape* rope;
+            std::vector<sf3d::Sound*> sounds;
     };
 }
 
