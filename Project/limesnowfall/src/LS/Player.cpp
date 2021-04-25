@@ -106,6 +106,14 @@ LS::Player::Player(Game* owner) :
     jumpBuffer->loadFromFile("./Assets/jump.wav");
     jumpSound = new sf3d::Sound();
     jumpSound->setBuffer(*jumpBuffer);
+    dropBuffer = new sf3d::SoundBuffer();
+    dropBuffer->loadFromFile("./Assets/drop.wav");
+    dropSound = new sf3d::Sound();
+    dropSound->setBuffer(*dropBuffer);
+    pickupBuffer = new sf3d::SoundBuffer();
+    pickupBuffer->loadFromFile("./Assets/pickup.wav");
+    pickupSound = new sf3d::Sound();
+    pickupSound->setBuffer(*pickupBuffer);
     healthBar = new sf3d::RectangleShape();
     healthBar->setFillColor(sf3d::Color::Green);
     healthBar->setSize(sf3d::Vector3f(250.0f, 25.0f, 5.0f));
@@ -142,6 +150,10 @@ LS::Player::~Player()
     delete dieBuffer;
     delete jumpSound;
     delete jumpBuffer;
+    delete dropSound;
+    delete dropBuffer;
+    delete pickupSound;
+    delete pickupBuffer;
     delete healthBar;
 }
 
@@ -235,6 +247,13 @@ bool LS::Player::pickup()
         return false;
     }
     briefcase = true;
+    if (pickupSound != nullptr)
+    {
+        if (pickupSound->getStatus() != sf3d::SoundSource::Status::Playing)
+        {
+            pickupSound->play();
+        }
+    }
     return true;
 }
 
@@ -250,6 +269,13 @@ bool LS::Player::drop()
         return false;
     }
     briefcase = false;
+    if (dropSound != nullptr)
+    {
+        if (dropSound->getStatus() != sf3d::SoundSource::Status::Playing)
+        {
+            dropSound->play();
+        }
+    }
     return true;
 }
 

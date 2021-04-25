@@ -39,6 +39,10 @@ namespace LS
             float getAngle() const;
             Game* owner;
             sf3d::RectangleShape* healthBar;
+            sf3d::SoundBuffer* dropBuffer;
+            sf3d::Sound* dropSound;
+            sf3d::SoundBuffer* pickupBuffer;
+            sf3d::Sound* pickupSound;
             sf3d::SoundBuffer* jumpBuffer;
             sf3d::Sound* jumpSound;
             sf3d::SoundBuffer* dieBuffer;
