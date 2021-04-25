@@ -234,7 +234,6 @@ bool LS::Player::die()
         return false;
     }
     std::cout << "die" << std::endl;
-    getOwner()->act(Game::Action::DIE);
     dieSound->play();
     return true;
 }
@@ -279,7 +278,11 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
 {
     if (health <= 0)
     {
-        return false;
+        if (dieSound->getStatus() != sf3d::SoundSource::Status::Playing)
+        {
+            getOwner()->act(Game::Action::DIE);
+            return false;
+        }
     }
     if (reload > 0)
     {

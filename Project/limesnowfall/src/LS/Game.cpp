@@ -322,7 +322,7 @@ bool LS::Game::playerDie()
     {
         return false;
     }
-    output->close();
+    output = nullptr;
     return true;
 }
 
@@ -350,6 +350,11 @@ bool LS::Game::countSound(int sounds)
 
 bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 {
+    if (output == nullptr)
+    {
+        return false;
+    }
+
     float gravity = 250.0f;
     sf3d::Vector3f center = window->getView().getCenter();
     sf3d::Vector2f mouse = sf3d::Vector2f(sf3d::Mouse::getPosition(*output))+(sf3d::Vector2f(center.x, center.y)-(window->getView().getSize()*0.5f));

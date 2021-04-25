@@ -11,16 +11,11 @@
 
 typedef LS::LimeSnowfall Application;
 
-void report(const sf3d::Vector2f& target)
-{
-    std::cout << target.x << "  " << target.y << std::endl;
-}
-
 int main(int argc, char** argv)
 {
     sf3d::View view;
-    sf3d::Vector2f center;
     float deltaTime;
+    float reset;
     bool focus;
     Application* application;
     sf3d::Clock* clock = new sf3d::Clock();
@@ -35,6 +30,7 @@ int main(int argc, char** argv)
     frame->setTexture(output->getTexture());
     view = window->getDefaultView();
     focus = true;
+    reset = 0.0f;
     clock->restart();
     while (window->isOpen())
     {
@@ -54,46 +50,24 @@ int main(int argc, char** argv)
                     break;
             }
         }
-        //report(center);
         window->clear(sf3d::Color::White);
         output->clear(sf3d::Color::Black);
-        //window->setView(sf3d::View(center, sf3d::Vector2f(window->getSize())));
-        if (sf3d::Mouse::isButtonPressed(sf3d::Mouse::Button::Left))
+        if (reset > 0.0f)
         {
-            application->act(LS::Game::Action::SHOOT);
-        }
-        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Space))
-        {
-            application->act(LS::Game::Action::JUMP);
-        }
-        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::E))
-        {
-            application->act(LS::Game::Action::PICKUP);
-        }
-        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::F))
-        {
-            application->act(LS::Game::Action::DROP);
-        }
-        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::A))
-        {
-            application->act(LS::Game::Action::MOVE_LEFT);
-        }
-        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::D))
-        {
-            application->act(LS::Game::Action::MOVE_RIGHT);
-        }
-        deltaTime = clock->restart().asSeconds();
-        output->setView(view);
-        if (focus)
-        {
-            if (application->update(output, deltaTime))
+            if (focus)
             {
-                output->display();
-                window->draw(*frame);
-                window->display();
-                if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Escape))
+                deltaTime = clock->restart().asSeconds();
+                reset -= deltaTime;
+                if (reset < 0.0f)
                 {
-                    window->close();
+                    reset = 0.0f;
+                    application = new Application(window);
+                }
+                else
+                {
+                    output->display();
+                    window->draw(*frame);
+                    window->display();
                 }
             }
             else
@@ -101,14 +75,64 @@ int main(int argc, char** argv)
                 output->display();
                 window->draw(*frame);
                 window->display();
-                window->close();
             }
         }
         else
         {
-            output->display();
-            window->draw(*frame);
-            window->display();
+            if (sf3d::Mouse::isButtonPressed(sf3d::Mouse::Button::Left))
+            {
+                application->act(LS::Game::Action::SHOOT);
+            }
+            if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Space))
+            {
+                application->act(LS::Game::Action::JUMP);
+            }
+            if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::E))
+            {
+                application->act(LS::Game::Action::PICKUP);
+            }
+            if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::F))
+            {
+                application->act(LS::Game::Action::DROP);
+            }
+            if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::A))
+            {
+                application->act(LS::Game::Action::MOVE_LEFT);
+            }
+            if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::D))
+            {
+                application->act(LS::Game::Action::MOVE_RIGHT);
+            }
+            deltaTime = clock->restart().asSeconds();
+            output->setView(view);
+            if (focus)
+            {
+                if (application->update(output, deltaTime))
+                {
+                    output->display();
+                    window->draw(*frame);
+                    window->display();
+                    if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Escape))
+                    {
+                        window->close();
+                    }
+                }
+                else
+                {
+                    output->display();
+                    window->draw(*frame);
+                    window->display();
+                    delete application;
+                    application = nullptr;
+                    reset = 2.5f;
+                }
+            }
+            else
+            {
+                output->display();
+                window->draw(*frame);
+                window->display();
+            }
         }
     }
     delete clock;
