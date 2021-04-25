@@ -40,6 +40,7 @@ bool LS::Bullet::update(sf3d::RenderTexture* window, float deltaTime)
     shape->move(sf3d::Vector2f(cosf(angle), sinf(angle))*5000.0f*deltaTime);
     setScale(shape->getSize());
     setPosition(shape->getPosition());
+    setRotation(shape->getRotation());
     window->draw(*shape);
     return true;
 }

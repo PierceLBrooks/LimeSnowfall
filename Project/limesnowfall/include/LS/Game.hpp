@@ -51,7 +51,6 @@ namespace LS
             bool update(sf3d::RenderTexture* window, float deltaTime);
             sf3d::RenderWindow* getWindow() const;
             Player* getPlayer() const;
-            sf3d::Vector2f getPlayerPosition() const;
         protected:
             float pi;
             float life;

@@ -167,7 +167,7 @@ bool LS::Player::jump()
         return false;
     }
     velocity.x = static_cast<float>(motion)*speed;
-    velocity.y = -speed*2.5f;
+    velocity.y = -speed*2.5f*((briefcase)?0.75f:1.0f);
     airborne = true;
     return true;
 }
@@ -376,6 +376,7 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
     }
     setScale(sprite->getScale());
     setPosition(sprite->getPosition());
+    setRotation(sprite->getRotation());
     move(sf3d::Vector3f(0.0f, -sprite->getOrigin().y*2.0f, 0.0f));
     return true;
 }

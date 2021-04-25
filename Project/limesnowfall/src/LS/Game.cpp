@@ -327,8 +327,11 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
     if (spawner >= spawn)
     {
         float goal;
-        float axis = sinf(life*pi)*0.9f;
-        spawner -= spawn;
+        float axis = sinf(life*pi)*0.8f;
+        while (spawner >= spawn)
+        {
+            spawner -= spawn;
+        }
         spawn += cosf(life*pi);
         while (spawn < 0.0f)
         {
@@ -336,9 +339,13 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
         }
         spawn /= sqrtf(life)/pi;
         spawn /= life-spawnLast;
+        while (spawn > 15.0f)
+        {
+            spawn *= 0.5f;
+        }
         std::cout << "spawn" << axis << std::endl;
         goal = static_cast<float>(output->getSize().y)*0.5f;
-        goal -= fabsf(cosf((life*pi)+pi))*goal*0.75f;
+        goal -= fabsf(cosf(((life*pi)+pi)*0.75f))*goal*0.75f;
         axis *= static_cast<float>(output->getSize().x)*0.5f;
         axis += static_cast<float>(output->getSize().x)*0.5f;
         if (enemies.empty())
@@ -346,11 +353,11 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
             spawnLast = life;
             if (sinf(life*pi) > 0.0f)
             {
-                enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, player->getScale()));
+                enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, -1, player->getScale()));
             }
             else
             {
-                enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, player->getScale()));
+                enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, 1, player->getScale()));
             }
         }
         else
@@ -360,11 +367,11 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
                 spawnLast = life;
                 if (sinf(life*pi) > 0.0f)
                 {
-                    enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, player->getScale()));
+                    enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, -1, player->getScale()));
                 }
                 else
                 {
-                    enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, player->getScale()));
+                    enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, 1, player->getScale()));
                 }
             }
         }
