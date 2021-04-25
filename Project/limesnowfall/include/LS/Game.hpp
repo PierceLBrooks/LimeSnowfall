@@ -27,14 +27,22 @@ namespace LS
                 NONE,
                 SHOOT,
                 MOVE_LEFT,
-                MOVE_RIGHT
+                MOVE_RIGHT,
+                PICKUP,
+                DROP,
+                JUMP,
+                DIE
             };
             Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size);
             virtual ~Game();
             bool act(Action action);
-            bool shoot();
-            bool movePlayer(const sf3d::Vector2i& movement);
-            void update(sf3d::RenderTexture* window, float deltaTime);
+            bool playerShoot();
+            bool playerMove(const sf3d::Vector2i& movement);
+            bool playerPickup();
+            bool playerDrop();
+            bool playerJump();
+            bool playerDie();
+            bool update(sf3d::RenderTexture* window, float deltaTime);
             sf3d::RenderWindow* getWindow() const;
             Player* getPlayer() const;
             sf3d::Vector2f getPlayerPosition() const;
@@ -46,11 +54,13 @@ namespace LS
             sf3d::RenderTexture* window;
             sf3d::Camera* camera;
             sf3d::Light* light;
+            sf3d::Light* cameraLight;
             sf3d::Cuboid* axisX;
             sf3d::Cuboid* axisY;
             sf3d::Cuboid* axisZ;
             sf3d::Billboard* frame;
             sf3d::RenderTexture* scene;
+            sf3d::Cuboid* briefcase;
             Object* shaftBottom;
             Object* shaftTop;
             sf3d::View view;

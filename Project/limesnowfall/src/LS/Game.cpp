@@ -20,20 +20,27 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
 
     light = new sf3d::Light();
     light->setColor(sf3d::Color::White);
-    light->setAmbientIntensity(0.5f);
+    light->setAmbientIntensity(0.25f);
     light->setDiffuseIntensity(1.0f);
     light->setLinearAttenuation(0.2f);
     light->setQuadraticAttenuation(0.05f);
-    //light->setDirectional(true);
-    //light->setDirection(sf3d::Vector3f(0.0f, 0.0f, 1.0f));
+    light->setDirectional(true);
+    light->setDirection(sf3d::Vector3f(0.0f, 0.0f, 1.0f));
     light->enable();
+    cameraLight = new sf3d::Light();
+    cameraLight->setColor(sf3d::Color::White);
+    cameraLight->setAmbientIntensity(0.1f);
+    cameraLight->setDiffuseIntensity(1.0f);
+    cameraLight->setLinearAttenuation(0.02f);
+    cameraLight->setQuadraticAttenuation(0.005f);
+    cameraLight->enable();
     sf3d::Light::enableLighting();
 
     float aspectRatio = static_cast<float>(output->getSize().x) / static_cast<float>(output->getSize().y);
     sf3d::Vector3f downscaleFactor(1.0f / static_cast<float>(output->getSize().x) * aspectRatio, -1.0f / static_cast<float>(output->getSize().y), 1);
 
     camera->scale(1.0f / aspectRatio, 1.0f, 1.0f);
-    camera->setPosition(sf3d::Vector3f(0.0f, 0.0f, 25.0f));
+    camera->setPosition(sf3d::Vector3f(0.0f, 1.0f, 25.0f));
     //camera->setDirection(sf3d::Vector3f(sqrtf(2.0f)*0.5f, 0.0f, sqrtf(2.0f)*0.5f));
     camera->setDirection(sf3d::Vector3f(0.0f, 0.0f, -1.0f));
     camera->setUpVector(sf3d::Vector3f(0.0f, 1.0f, 0.0f));
@@ -71,7 +78,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
 
     view = output->getDefaultView();
 
-    light->setPosition(sf3d::Vector3f());
+    light->setPosition(sf3d::Vector3f(0.0f, 0.0f, 5.0f));
 
     frame = new sf3d::Billboard();
     scene = new sf3d::RenderTexture();
@@ -82,6 +89,13 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     //frame->setCamera(*camera);
     frame->setPosition(sf3d::Vector3f(center.x, center.y, 0.0f));
     frame->setOrigin(sf3d::Vector3f(center.x, center.y, 0.0f));
+
+    briefcase = new sf3d::Cuboid();
+    briefcase->setColor(sf3d::Color::White);
+    briefcase->setPosition(light->getPosition());
+    briefcase->setSize(sf3d::Vector3f(0.5f, 0.5f, 0.5f));
+    briefcase->setOrigin(briefcase->getSize()*0.5f);
+    briefcase->move(-camera->getDirection()*15.0f);
 }
 
 LS::Game::~Game()
@@ -92,10 +106,12 @@ LS::Game::~Game()
     delete axisY;
     delete axisZ;
     delete camera;
+    delete cameraLight;
     delete light;
     delete player;
     delete frame;
     delete scene;
+    delete briefcase;
 }
 
 bool LS::Game::act(Action action)
@@ -103,16 +119,24 @@ bool LS::Game::act(Action action)
     switch (action)
     {
     case SHOOT:
-        return shoot();
+        return playerShoot();
     case MOVE_LEFT:
-        return movePlayer(sf3d::Vector2i(-1, 0));
+        return playerMove(sf3d::Vector2i(-1, 0));
     case MOVE_RIGHT:
-        return movePlayer(sf3d::Vector2i(1, 0));
+        return playerMove(sf3d::Vector2i(1, 0));
+    case PICKUP:
+        return playerPickup();
+    case DROP:
+        return playerDrop();
+    case JUMP:
+        return playerJump();
+    case DIE:
+        return playerDie();
     }
     return false;
 }
 
-bool LS::Game::shoot()
+bool LS::Game::playerShoot()
 {
     if (window == nullptr)
     {
@@ -128,13 +152,78 @@ bool LS::Game::shoot()
     return false;
 }
 
-bool LS::Game::movePlayer(const sf3d::Vector2i& movement)
+bool LS::Game::playerMove(const sf3d::Vector2i& movement)
 {
     player->move(movement);
     return true;
 }
 
-void LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
+bool LS::Game::playerPickup()
+{
+    if (output == nullptr)
+    {
+        return false;
+    }
+    if (briefcase == nullptr)
+    {
+        return false;
+    }
+    std::cout << (player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))*0.25f << " " << briefcase->getPosition().x << std::endl;
+    if (fabsf(((player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))*0.25f)-(briefcase->getPosition().x)) > 54.0f)
+    {
+        return false;
+    }
+    if (!player->pickup())
+    {
+        return false;
+    }
+    delete briefcase;
+    briefcase = nullptr;
+    return true;
+}
+
+bool LS::Game::playerDrop()
+{
+    if (output == nullptr)
+    {
+        return false;
+    }
+    if (briefcase != nullptr)
+    {
+        return false;
+    }
+    if (!player->drop())
+    {
+        return false;
+    }
+    briefcase = new sf3d::Cuboid();
+    briefcase->setColor(sf3d::Color::White);
+    briefcase->setPosition(light->getPosition());
+    briefcase->setSize(sf3d::Vector3f(0.5f, 0.5f, 0.5f));
+    briefcase->setOrigin(briefcase->getSize()*0.5f);
+    briefcase->move(-camera->getDirection()*15.0f);
+    briefcase->move(sf3d::Vector3f((player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/480.0f, 0.0f, 0.0f));
+    briefcase->setPosition(sf3d::Vector3f(briefcase->getPosition().x*4.0f, briefcase->getPosition().y, briefcase->getPosition().z));
+    std::cout << briefcase->getPosition().x << std::endl;
+    return true;
+}
+
+bool LS::Game::playerJump()
+{
+    return player->jump();
+}
+
+bool LS::Game::playerDie()
+{
+    if (output == nullptr)
+    {
+        return false;
+    }
+    output->close();
+    return true;
+}
+
+bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 {
     turn += deltaTime;
 
@@ -145,6 +234,8 @@ void LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 
     window->setView(*camera);
 
+    cameraLight->setPosition(camera->getPosition());
+
     /*
     window->draw(*axisX);
     window->draw(*axisY);
@@ -154,22 +245,33 @@ void LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
     window->draw(*shaftTop);
     window->draw(*shaftBottom);
 
+    if (briefcase != nullptr)
+    {
+        window->draw(*briefcase);
+    }
+
     //light->disable();
     sf3d::Light::disableLighting();
+    window->enableDepthTest(false);
     window->setView(view);
     scene->setView(view);
     scene->clear(sf3d::Color::Transparent);
-    player->update(scene, deltaTime);
+    if (!player->update(scene, deltaTime))
+    {
+        return false;
+    }
     scene->display();
     //frame->setPosition(camera->getPosition());
     //frame->move(camera->getDirection()*deltaTime);
     //frame->move(0.0f, -deltaTime, 0.0f);
     //frame->setScale(turn, turn, turn);
-    frame->setRotation(-turn, sf3d::Vector3f(0.0f, 0.0f, 1.0f));
+    //frame->setRotation(-turn, sf3d::Vector3f(0.0f, 0.0f, 1.0f));
     sf3d::Light::enableLighting();
+    window->enableDepthTest(true);
     //light->enable();
     //window->setView(*camera);
     window->draw(*frame);
+    return true;
 }
 
 LS::Player* LS::Game::getPlayer() const

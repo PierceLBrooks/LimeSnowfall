@@ -54,6 +54,18 @@ int main(int argc, char** argv)
         {
             application->act(LS::Game::Action::SHOOT);
         }
+        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Space))
+        {
+            application->act(LS::Game::Action::JUMP);
+        }
+        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::E))
+        {
+            application->act(LS::Game::Action::PICKUP);
+        }
+        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::F))
+        {
+            application->act(LS::Game::Action::DROP);
+        }
         if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::A))
         {
             application->act(LS::Game::Action::MOVE_LEFT);
@@ -64,12 +76,21 @@ int main(int argc, char** argv)
         }
         deltaTime = clock->restart().asSeconds();
         output->setView(view);
-        application->update(output, deltaTime);
-        output->display();
-        window->draw(*frame);
-        window->display();
-        if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Escape))
+        if (application->update(output, deltaTime))
         {
+            output->display();
+            window->draw(*frame);
+            window->display();
+            if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Escape))
+            {
+                window->close();
+            }
+        }
+        else
+        {
+            output->display();
+            window->draw(*frame);
+            window->display();
             window->close();
         }
     }

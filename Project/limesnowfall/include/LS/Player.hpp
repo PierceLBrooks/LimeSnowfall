@@ -20,10 +20,14 @@ namespace LS
             Player(Game* owner);
             virtual ~Player();
             bool shoot();
+            bool jump();
+            bool pickup();
+            bool drop();
+            bool die();
             void move(const sf3d::Vector2i& movement);
             Game* getOwner() const;
             sf3d::Sprite* getSprite() const;
-            void update(sf3d::RenderTexture* window, float deltaTime);
+            bool update(sf3d::RenderTexture* window, float deltaTime);
         private:
             Game* owner;
             sf3d::Image* imageLeft;
@@ -31,12 +35,34 @@ namespace LS
             sf3d::Texture* textureLeft;
             sf3d::Texture* textureRight;
             sf3d::Sprite* sprite;
+            sf3d::Image* gunImageLeft;
+            sf3d::Image* gunImageRight;
+            sf3d::Texture* gunTextureLeft;
+            sf3d::Texture* gunTextureRight;
+            sf3d::Sprite* hand;
+            sf3d::Image* torchImageLeft;
+            sf3d::Image* torchImageRight;
+            sf3d::Texture* torchTextureLeft;
+            sf3d::Texture* torchTextureRight;
+            sf3d::Image* briefcaseImageLeft;
+            sf3d::Image* briefcaseImageRight;
+            sf3d::Texture* briefcaseTextureLeft;
+            sf3d::Texture* briefcaseTextureRight;
+            sf3d::Sprite* offhand;
+            sf3d::Vector2f handOffset;
+            sf3d::Vector2f offhandOffset;
+            sf3d::Vector2f center;
+            sf3d::Vector2f scale;
             sf3d::Vector2i movement;
             sf3d::Vector2i animationSize;
             std::vector<std::vector<sf3d::Vector2i>> animations;
-            float animation;
             unsigned int animationIndex;
+            float animation;
+            float limit;
+            float pi;
             int facing;
+            bool briefcase;
+            bool airborne;
     };
 }
 
