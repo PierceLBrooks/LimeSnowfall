@@ -138,6 +138,21 @@ LS::Player::~Player()
     delete healthBar;
 }
 
+int LS::Player::getFacing() const
+{
+    return facing;
+}
+
+bool LS::Player::getBriefcase() const
+{
+    return briefcase;
+}
+
+bool LS::Player::getAirborne() const
+{
+    return airborne;
+}
+
 bool LS::Player::shoot(float& angle)
 {
     //std::cout << "shoot" << std::endl;
@@ -205,8 +220,6 @@ bool LS::Player::pickup()
         return false;
     }
     briefcase = true;
-    offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
-    offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
     return true;
 }
 
@@ -222,8 +235,6 @@ bool LS::Player::drop()
         return false;
     }
     briefcase = false;
-    offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
-    offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
     return true;
 }
 
@@ -233,7 +244,14 @@ bool LS::Player::die()
     {
         return false;
     }
-    std::cout << "die" << std::endl;
+    if (dieSound == nullptr)
+    {
+        return false;
+    }
+    if (dieSound->getStatus() == sf3d::SoundSource::Status::Playing)
+    {
+        return false;
+    }
     dieSound->play();
     return true;
 }
@@ -303,9 +321,6 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
             {
                 facing = movement.x;
                 sprite->setTexture(*((facing>0)?textureRight:textureLeft));
-                hand->setTexture(*((facing>0)?gunTextureRight:gunTextureLeft));
-                offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
-                offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
             }
         }
         else
@@ -332,14 +347,26 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
                                              sprite->getTextureRect().width,
                                              sprite->getTextureRect().height));
     }
+    offhandTorch->setTextureRect(sf3d::IntRect((facing>0)?0:static_cast<int>(offhandTorch->getTexture()->getSize().x),
+                                               0,
+                                               static_cast<int>(offhandTorch->getTexture()->getSize().x)*((facing>0)?1:-1),
+                                               static_cast<int>(offhandTorch->getTexture()->getSize().y)));
+    offhandBriefcase->setTextureRect(sf3d::IntRect((facing>0)?0:static_cast<int>(offhandBriefcase->getTexture()->getSize().x),
+                                               0,
+                                               static_cast<int>(offhandBriefcase->getTexture()->getSize().x)*((facing>0)?1:-1),
+                                               static_cast<int>(offhandBriefcase->getTexture()->getSize().y)));
+    hand->setTextureRect(sf3d::IntRect((facing>0)?0:static_cast<int>(hand->getTexture()->getSize().x),
+                                               0,
+                                               static_cast<int>(hand->getTexture()->getSize().x)*((facing>0)?1:-1),
+                                               static_cast<int>(hand->getTexture()->getSize().y)));
     if (briefcase)
     {
         if (health < healthMax)
         {
             heal += deltaTime;
-            while (heal > 1.0f)
+            while (heal > 2.5f)
             {
-                heal -= 1.0f;
+                heal -= 2.5f;
                 if (health < healthMax)
                 {
                     std::cout << "heal" << std::endl;
@@ -392,7 +419,8 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
         offhandBriefcase->setScale(sprite->getScale());
         offhandBriefcase->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
         offhandBriefcase->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:0.125f))+(1.5f*static_cast<float>((facing>0)?offhandOffset.x:0.0f))), scale.y*(offhandOffset.y-2.5f));
-        window->draw(*offhandBriefcase);
+        offhandBriefcase->setColor(sf3d::Color::White);
+        offhandTorch->setColor(sf3d::Color::Transparent);
     }
     else
     {
@@ -410,8 +438,11 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
             float angle = getAngle();
             offhandTorch->setRotation(angle);
         }
-        window->draw(*offhandTorch);
+        offhandBriefcase->setColor(sf3d::Color::Transparent);
+        offhandTorch->setColor(sf3d::Color::White);
     }
+    window->draw(*offhandTorch);
+    window->draw(*offhandBriefcase);
     if (!airborne)
     {
         motion = movement.x;

@@ -60,6 +60,7 @@ int main(int argc, char** argv)
                 reset -= deltaTime;
                 if (reset < 0.0f)
                 {
+                    std::cout << "reset" << std::endl;
                     reset = 0.0f;
                     application = new Application(window);
                 }

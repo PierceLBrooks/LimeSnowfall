@@ -44,6 +44,15 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     light->setDirectional(true);
     light->setDirection(sf3d::Vector3f(0.0f, 0.0f, 1.0f));
     light->enable();
+    torchLight = new sf3d::Light();
+    torchLight->setColor(sf3d::Color::White);
+    torchLight->setAmbientIntensity(0.0f);
+    torchLight->setDiffuseIntensity(1.0f);
+    torchLight->setLinearAttenuation(0.2f);
+    torchLight->setQuadraticAttenuation(0.05f);
+    torchLight->setDirectional(true);
+    torchLight->setDirection(sf3d::Vector3f(0.0f, 0.0f, 1.0f));
+    torchLight->enable();
     cameraLight = new sf3d::Light();
     cameraLight->setColor(sf3d::Color::White);
     cameraLight->setAmbientIntensity(0.1f);
@@ -198,6 +207,7 @@ LS::Game::~Game()
     delete axisZ;
     delete camera;
     delete cameraLight;
+    delete torchLight;
     delete light;
     delete player;
     delete frame;
@@ -271,7 +281,6 @@ bool LS::Game::playerPickup()
     {
         return false;
     }
-    std::cout << (player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/32.0f << " " << briefcase->getPosition().x*4.0f << std::endl;
     if (fabsf(((player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/32.0f)-(briefcase->getPosition().x*4.0f)) > 4.0f)
     {
         return false;
@@ -322,7 +331,7 @@ bool LS::Game::playerDie()
     {
         return false;
     }
-    output = nullptr;
+    std::cout << "die" << std::endl;
     return true;
 }
 
@@ -428,6 +437,24 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
     cameraLight->setPosition(camera->getPosition());
     lightLeft->setPosition(ballLeft->getPosition());
     lightRight->setPosition(ballRight->getPosition());
+    if ((!player->getBriefcase()) && (!player->getAirborne()))
+    {
+        float torch = (player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/32.0f;
+        torchLight->setPosition(light->getPosition());
+        torchLight->move(sf3d::Vector3f(torch, 0.0f, 0.0f));
+        torchLight->setDirection(sf3d::Vector3f((player->getFacing()>0)?1.0f:-1.0f, 0.0f, 0.0f));
+        if (!torchLight->isEnabled())
+        {
+            torchLight->enable();
+        }
+    }
+    else
+    {
+        if (torchLight->isEnabled())
+        {
+            torchLight->disable();
+        }
+    }
 
     /*
     window->draw(*axisX);

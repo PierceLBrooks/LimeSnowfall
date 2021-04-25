@@ -75,6 +75,7 @@ namespace LS
             sf3d::Light* lightRight;
             sf3d::Light* light;
             sf3d::Light* cameraLight;
+            sf3d::Light* torchLight;
             sf3d::Cuboid* axisX;
             sf3d::Cuboid* axisY;
             sf3d::Cuboid* axisZ;

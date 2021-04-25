@@ -23,6 +23,9 @@ namespace LS
         public:
             Player(Game* owner);
             virtual ~Player();
+            int getFacing() const;
+            bool getBriefcase() const;
+            bool getAirborne() const;
             bool shoot(float& angle);
             bool jump();
             bool pickup();
