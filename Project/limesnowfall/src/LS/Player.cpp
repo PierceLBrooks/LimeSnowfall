@@ -123,7 +123,7 @@ LS::Player::~Player()
 
 bool LS::Player::shoot(float& angle)
 {
-    std::cout << "shoot" << std::endl;
+    //std::cout << "shoot" << std::endl;
     if (health <= 0)
     {
         return false;
@@ -157,7 +157,7 @@ void LS::Player::go(const sf3d::Vector2i& movement)
 
 bool LS::Player::jump()
 {
-    std::cout << "jump" << std::endl;
+    //std::cout << "jump" << std::endl;
     if (health <= 0)
     {
         return false;
@@ -228,7 +228,7 @@ bool LS::Player::hurt(Bullet* bullet)
         return false;
     }
     float distance = sqrtf(powf(getPosition().x-bullet->getPosition().x, 2.0f)+powf(getPosition().y-bullet->getPosition().y, 2.0f));
-    std::cout << distance << std::endl;
+    //std::cout << distance << std::endl;
     if (distance > static_cast<float>(animationSize.x)*0.5f)
     {
         return false;

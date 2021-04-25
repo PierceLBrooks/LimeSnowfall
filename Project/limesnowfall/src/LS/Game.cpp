@@ -103,6 +103,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     shaftBottom->setScale(15.0f, 15.0f, 15.0f);
     shaftBottom->setPosition(0.0f, 0.0f, 5.0f);
 
+    soundCount = 0;
     life = 0.0f;
     spawnLast = 0.0f;
     spawn = 5.0f*pi;
@@ -328,6 +329,17 @@ bool LS::Game::playerHurt(Bullet* bullet)
     return player->hurt(bullet);
 }
 
+bool LS::Game::countSound(int sounds)
+{
+    if (soundCount+sounds < 500)
+    {
+        soundCount += sounds;
+        return true;
+    }
+    std::cout << "sound" << soundCount << std::endl;
+    return false;
+}
+
 bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 {
     float gravity = 250.0f;
@@ -350,7 +362,7 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
             spawn += pi;
         }
         spawn /= sqrtf(life)/pi;
-        spawn /= life-spawnLast;
+        spawn /= sqrtf(life-spawnLast);
         while (spawn > 15.0f)
         {
             spawn *= 0.5f;
@@ -374,7 +386,7 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
         }
         else
         {
-            if (fabsf(enemies.back()->getPosition().x-axis) > static_cast<float>(player->getSprite()->getTextureRect().width))
+            if ((enemies.size() < 15) && (fabsf(enemies.back()->getPosition().x-axis) > static_cast<float>(player->getSprite()->getTextureRect().width)))
             {
                 spawnLast = life;
                 if (sinf(life*pi) > 0.0f)

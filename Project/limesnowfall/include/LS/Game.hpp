@@ -49,6 +49,7 @@ namespace LS
             bool playerJump();
             bool playerDie();
             bool playerHurt(Bullet* bullet);
+            bool countSound(int sounds);
             bool update(sf3d::RenderTexture* window, float deltaTime);
             sf3d::RenderWindow* getWindow() const;
             Player* getPlayer() const;
@@ -58,6 +59,7 @@ namespace LS
             float spawnLast;
             float spawn;
             float spawner;
+            int soundCount;
             Player* player;
             sf3d::Image* enemyImageLeft;
             sf3d::Image* enemyImageRight;
