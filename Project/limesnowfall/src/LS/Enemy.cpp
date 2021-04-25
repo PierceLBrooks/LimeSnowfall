@@ -6,14 +6,16 @@
 #include <iostream>
 
 LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, int facing, const sf3d::Vector3f& scale, const std::vector<sf3d::SoundBuffer*>& soundBuffers) :
-    Ownable<Game*>(),
-    Shooter(),
-    owner(owner),
+    Shooter(owner),
     goal(goal),
     facing(facing)
 {
+    step = 0;
     health = 2;
     life = 0.0f;
+    target = 0.0f;
+    shoot = 0.0f;
+    aim = 0.0f;
     pi = PI;
     sprite = new sf3d::Sprite();
     sprite->setTexture(*texture);
@@ -27,7 +29,7 @@ LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, in
     rope->setOrigin(rope->getSize()*0.5f);
     for (unsigned int i = 0; i != soundBuffers.size(); ++i)
     {
-        if (owner->countSound(1))
+        if (getOwner()->countSound(1))
         {
             sounds.push_back(new sf3d::Sound());
             sounds.back()->setBuffer(*soundBuffers[i]);
@@ -36,6 +38,10 @@ LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, in
         {
             sounds.push_back(nullptr);
         }
+    }
+    if (facing < 0)
+    {
+        target = 180.0f;
     }
 }
 
@@ -47,17 +53,12 @@ LS::Enemy::~Enemy()
     {
         if (sounds[i] != nullptr)
         {
-            owner->countSound(-1);
+            getOwner()->countSound(-1);
             delete sounds[i];
             sounds[i] = nullptr;
         }
     }
     sounds.clear();
-}
-
-LS::Game* LS::Enemy::getOwner() const
-{
-    return owner;
 }
 
 bool LS::Enemy::hurt(Bullet* bullet)
@@ -77,6 +78,18 @@ bool LS::Enemy::hurt(Bullet* bullet)
     {
         if (health <= 0)
         {
+            if (sounds[0] != nullptr)
+            {
+                sounds[0]->stop();
+                delete sounds[0];
+                sounds[0] = nullptr;
+            }
+            if (sounds[1] != nullptr)
+            {
+                sounds[1]->stop();
+                delete sounds[1];
+                sounds[1] = nullptr;
+            }
             if (sounds[2] != nullptr)
             {
                 sounds[2]->play();
@@ -95,9 +108,10 @@ bool LS::Enemy::hurt(Bullet* bullet)
 
 bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* player)
 {
+    ++step;
     if (sprite->getPosition().y < goal)
     {
-        sprite->move(sf3d::Vector3f(0.0f, deltaTime*sprite->getScale().y*static_cast<float>(sprite->getTexture()->getSize().y)*0.5f, 0.0f));
+        sprite->move(sf3d::Vector3f(0.0f, deltaTime*sprite->getScale().y*static_cast<float>(sprite->getTexture()->getSize().y), 0.0f));
     }
     else
     {
@@ -119,7 +133,7 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
                     {
                         if (sounds[i] != nullptr)
                         {
-                            owner->countSound(-1);
+                            getOwner()->countSound(-1);
                             delete sounds[i];
                             sounds[i] = nullptr;
                         }
@@ -142,10 +156,52 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
         }
         else
         {
-            if ((facing > 0) == (player->getPosition().x > sprite->getPosition().x))
+            if (shoot > 0.0f)
             {
-                float angle = getAngle();
-                sprite->setRotation(angle);
+                shoot -= deltaTime;
+                if (step%5 == 0)
+                {
+                    getOwner()->enemyShoot(this, target);
+                }
+            }
+            else
+            {
+                if ((facing > 0) == (player->getPosition().x > sprite->getPosition().x))
+                {
+                    float difference;
+                    float angle = getAngle();
+                    target = fmodf(target, 360.0f);
+                    difference = fmodf(fabsf(angle-target), 360.0f);
+                    if ((difference > 180.0f) && (facing > 0))
+                    {
+                        difference = 360.0f-difference;
+                    }
+                    //std::cout << angle << " " << target << " " << difference << std::endl;
+                    if (fabsf((target+difference)-angle) < fabsf((target-difference)-angle))
+                    {
+                        target += difference*deltaTime;
+                    }
+                    else
+                    {
+                        target -= difference*deltaTime;
+                    }
+                    if (fabsf(difference) < 5.0f)
+                    {
+                        aim += deltaTime;
+                        if (aim > 1.0f)
+                        {
+                            shoot = aim;
+                            if (!sounds.empty())
+                            {
+                                if (sounds[0] != nullptr)
+                                {
+                                    sounds[0]->play();
+                                }
+                            }
+                        }
+                    }
+                    sprite->setRotation(target+((facing>0)?0.0f:180.0f));
+                }
             }
         }
     }
@@ -164,5 +220,5 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
 
 float LS::Enemy::getAngle() const
 {
-    return (atan2f(owner->getPlayer()->getPosition().y-(sprite->getPosition().y-(sprite->getOrigin().y)), owner->getPlayer()->getPosition().x-(sprite->getPosition().x))*(180.0f/pi))+((facing>0)?0.0f:180.0f);
+    return (atan2f(getOwner()->getPlayer()->getPosition().y-(sprite->getPosition().y-(sprite->getOrigin().y)), getOwner()->getPlayer()->getPosition().x-(sprite->getPosition().x))*(180.0f/pi));
 }

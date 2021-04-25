@@ -18,6 +18,7 @@ LS::Bullet::Bullet(Shooter* owner, float angle) :
     shape->setRotation(angle*(180.0f/pi), sf3d::Vector3f(0.0f, 0.0f, 1.0f));
     shape->setOrigin(shape->getSize()*0.5f);
     shape->setPosition(owner->getPosition());
+    center = sf3d::Vector2f(owner->getOwner()->getWindow()->getSize())*0.5f;
 }
 
 LS::Bullet::~Bullet()
@@ -38,6 +39,10 @@ bool LS::Bullet::update(sf3d::RenderTexture* window, float deltaTime)
         return false;
     }
     shape->move(sf3d::Vector2f(cosf(angle), sinf(angle))*5000.0f*deltaTime);
+    if (shape->getPosition().y > center.y*1.75f)
+    {
+        return false;
+    }
     setScale(shape->getSize());
     setPosition(shape->getPosition());
     setRotation(shape->getRotation());

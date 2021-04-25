@@ -329,6 +329,12 @@ bool LS::Game::playerHurt(Bullet* bullet)
     return player->hurt(bullet);
 }
 
+bool LS::Game::enemyShoot(Enemy* enemy, float angle)
+{
+    bullets.push_back(new Bullet(enemy, angle*(pi/180.0f)));
+    return true;
+}
+
 bool LS::Game::countSound(int sounds)
 {
     if (soundCount+sounds < 500)

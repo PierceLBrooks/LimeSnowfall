@@ -49,6 +49,7 @@ namespace LS
             bool playerJump();
             bool playerDie();
             bool playerHurt(Bullet* bullet);
+            bool enemyShoot(Enemy* enemy, float angle);
             bool countSound(int sounds);
             bool update(sf3d::RenderTexture* window, float deltaTime);
             sf3d::RenderWindow* getWindow() const;

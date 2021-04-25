@@ -6,9 +6,7 @@
 #include <iostream>
 
 LS::Player::Player(Game* owner) :
-    Ownable<Game*>(),
-    Shooter(),
-    owner(owner),
+    Shooter(owner),
     movement(0, 0),
     facing(1),
     motion(0),
@@ -93,6 +91,14 @@ LS::Player::Player(Game* owner) :
     shotBuffer->loadFromFile("./Assets/shot.wav");
     shotSound = new sf3d::Sound();
     shotSound->setBuffer(*shotBuffer);
+    hurtBuffer = new sf3d::SoundBuffer();
+    hurtBuffer->loadFromFile("./Assets/snowden_hurt.wav");
+    hurtSound = new sf3d::Sound();
+    hurtSound->setBuffer(*hurtBuffer);
+    dieBuffer = new sf3d::SoundBuffer();
+    dieBuffer->loadFromFile("./Assets/snowden_die.wav");
+    dieSound = new sf3d::Sound();
+    dieSound->setBuffer(*dieBuffer);
 }
 
 LS::Player::~Player()
@@ -119,6 +125,8 @@ LS::Player::~Player()
     delete briefcaseImageLeft;
     delete shotSound;
     delete shotBuffer;
+    delete hurtSound;
+    delete hurtBuffer;
 }
 
 bool LS::Player::shoot(float& angle)
@@ -217,7 +225,8 @@ bool LS::Player::die()
         return false;
     }
     std::cout << "die" << std::endl;
-    owner->act(Game::Action::DIE);
+    getOwner()->act(Game::Action::DIE);
+    dieSound->play();
     return true;
 }
 
@@ -229,21 +238,27 @@ bool LS::Player::hurt(Bullet* bullet)
     }
     float distance = sqrtf(powf(getPosition().x-bullet->getPosition().x, 2.0f)+powf(getPosition().y-bullet->getPosition().y, 2.0f));
     //std::cout << distance << std::endl;
-    if (distance > static_cast<float>(animationSize.x)*0.5f)
+    if (distance > static_cast<float>(animationSize.x)*0.75f)
     {
         return false;
     }
-    --health;
-    if (health <= 0)
+    if (hurtSound->getStatus() != sf3d::SoundSource::Status::Playing)
     {
-        die();
+        //--health;
+        if (health <= 0)
+        {
+            die();
+        }
+        else
+        {
+            hurtSound->play();
+        }
+    }
+    else
+    {
+        return false;
     }
     return true;
-}
-
-LS::Game* LS::Player::getOwner() const
-{
-    return owner;
 }
 
 sf3d::Sprite* LS::Player::getSprite() const

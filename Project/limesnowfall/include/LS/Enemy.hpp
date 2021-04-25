@@ -18,24 +18,24 @@ namespace LS
 {
     class Game;
 
-    class Enemy : public Ownable<Game*>, public Shooter
+    class Enemy : public Shooter
     {
         public:
             Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, int facing, const sf3d::Vector3f& scale, const std::vector<sf3d::SoundBuffer*>& soundBuffers);
             virtual ~Enemy();
-            Game* getOwner() const;
             bool hurt(Bullet* bullet);
             bool update(sf3d::RenderTexture* window, float deltaTime, Player* player);
         private:
             float getAngle() const;
-            Game* owner;
             int health;
             int facing;
+            int step;
             float goal;
             float life;
             float pi;
             float target;
             float aim;
+            float shoot;
             sf3d::Sprite* sprite;
             sf3d::RectangleShape* rope;
             std::vector<sf3d::Sound*> sounds;

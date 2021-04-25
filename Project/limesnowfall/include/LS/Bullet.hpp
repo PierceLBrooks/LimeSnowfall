@@ -19,6 +19,7 @@ namespace LS
             Shooter* getOwner() const;
             bool update(sf3d::RenderTexture* window, float deltaTime);
         private:
+            sf3d::Vector2f center;
             sf3d::RectangleShape* shape;
             Shooter* owner;
             float angle;

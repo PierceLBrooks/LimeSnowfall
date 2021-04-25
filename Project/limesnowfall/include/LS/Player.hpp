@@ -17,7 +17,7 @@ namespace LS
 {
     class Game;
 
-    class Player : public Ownable<Game*>, public Shooter
+    class Player : public Shooter
     {
         public:
             Player(Game* owner);
@@ -29,12 +29,15 @@ namespace LS
             bool die();
             bool hurt(Bullet* bullet);
             void go(const sf3d::Vector2i& movement);
-            Game* getOwner() const;
             sf3d::Sprite* getSprite() const;
             bool update(sf3d::RenderTexture* window, float deltaTime, const sf3d::Vector2f& mouse);
         private:
             float getAngle() const;
             Game* owner;
+            sf3d::SoundBuffer* dieBuffer;
+            sf3d::Sound* dieSound;
+            sf3d::SoundBuffer* hurtBuffer;
+            sf3d::Sound* hurtSound;
             sf3d::SoundBuffer* shotBuffer;
             sf3d::Sound* shotSound;
             sf3d::Image* imageLeft;
