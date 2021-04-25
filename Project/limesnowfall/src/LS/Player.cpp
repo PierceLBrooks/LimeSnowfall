@@ -303,29 +303,18 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
     {
         sprite->setPosition(-limit+(0.5f*static_cast<float>(window->getSize().x)), sprite->getPosition().y);
     }
-    hand->setOrigin(sf3d::Vector3f(static_cast<float>(hand->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
+    hand->setOrigin(sf3d::Vector3f((facing>0)?0.0f:static_cast<float>(hand->getTexture()->getSize().x), 0.0f, 0.0f));
     hand->setPosition(sprite->getPosition());
     hand->setScale(sprite->getScale());
-    hand->move((scale.x*handOffset.x*static_cast<float>((facing>0)?0.5f:2.5f))-(handOffset.x*scale.x*1.5f), (scale.y*handOffset.y)-(sprite->getOrigin().y*2.5f));
-    if ((facing > 0) != (mouse.x > sprite->getPosition().x))
+    hand->move(scale.x*((handOffset.x*static_cast<float>((facing>0)?0.5f:2.5f))-(handOffset.x*1.5f)-(static_cast<float>(hand->getTexture()->getSize().x)*static_cast<float>(facing)*0.5f)), (scale.y*handOffset.y)-(sprite->getOrigin().y*2.5f));
+    if (((facing > 0) != (mouse.x > sprite->getPosition().x)) || (mouse.y > (sprite->getPosition().y-(sprite->getOrigin().y))))
     {
         hand->setRotation(0.0f);
     }
     else
     {
         float angle = (atan2f(mouse.y-(sprite->getPosition().y-(sprite->getOrigin().y)), mouse.x-(sprite->getPosition().x))*(180.0f/pi))+((facing>0)?0.0f:180.0f);
-        //angle += 90.0f;
         hand->setRotation(angle);
-        angle *= pi/180.0f;
-        angle = fmodf(angle, pi*2.0f);
-        while (angle < 0.0f)
-        {
-            angle += pi*2.0f;
-        }
-        float rotation = angle;
-        angle = pi-fabsf(angle-pi);
-        //hand->move(-cosf(rotation)*(angle/pi)*scale.x*50.0f, -sinf(rotation)*(angle/pi)*scale.y*25.f);
-        std::cout << rotation << std::endl;
     }
     window->draw(*hand);
     window->draw(*sprite);
@@ -340,12 +329,12 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
     }
     else
     {
-        offhandTorch->setOrigin(sf3d::Vector3f(static_cast<float>(offhandTorch->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
+        offhandTorch->setOrigin(sf3d::Vector3f((facing>0)?0.0f:static_cast<float>(offhandTorch->getTexture()->getSize().x), 0.0f, 0.0f));
         offhandTorch->setPosition(sprite->getPosition());
         offhandTorch->setScale(sprite->getScale());
         offhandTorch->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
-        offhandTorch->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f), scale.y*offhandOffset.y);
-        if ((facing > 0) != (mouse.x > sprite->getPosition().x))
+        offhandTorch->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f-(static_cast<float>(offhandTorch->getTexture()->getSize().x)*static_cast<float>(facing)*0.5f)), scale.y*offhandOffset.y);
+        if (((facing > 0) != (mouse.x > sprite->getPosition().x)) || (mouse.y > (sprite->getPosition().y-(sprite->getOrigin().y))))
         {
             offhandTorch->setRotation(0.0f);
         }
