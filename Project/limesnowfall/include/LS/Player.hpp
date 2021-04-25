@@ -9,6 +9,8 @@
 #include <SFML3D/Graphics/Image.hpp>
 #include <SFML3D/Graphics/Texture.hpp>
 #include <SFML3D/Graphics/Sprite.hpp>
+#include <SFML3D/Audio/SoundBuffer.hpp>
+#include <SFML3D/Audio/Sound.hpp>
 
 namespace LS
 {
@@ -27,9 +29,11 @@ namespace LS
             void move(const sf3d::Vector2i& movement);
             Game* getOwner() const;
             sf3d::Sprite* getSprite() const;
-            bool update(sf3d::RenderTexture* window, float deltaTime);
+            bool update(sf3d::RenderTexture* window, float deltaTime, const sf3d::Vector2f& mouse);
         private:
             Game* owner;
+            sf3d::SoundBuffer* shotBuffer;
+            sf3d::Sound* shotSound;
             sf3d::Image* imageLeft;
             sf3d::Image* imageRight;
             sf3d::Texture* textureLeft;
@@ -55,6 +59,7 @@ namespace LS
             sf3d::Vector2f velocity;
             sf3d::Vector2f center;
             sf3d::Vector2f scale;
+            sf3d::Vector2f mouse;
             sf3d::Vector2i movement;
             sf3d::Vector2i animationSize;
             std::vector<std::vector<sf3d::Vector2i>> animations;
@@ -64,8 +69,10 @@ namespace LS
             float speed;
             float limit;
             float pi;
+            float reload;
             int facing;
             int motion;
+            int health;
             bool briefcase;
             bool airborne;
     };

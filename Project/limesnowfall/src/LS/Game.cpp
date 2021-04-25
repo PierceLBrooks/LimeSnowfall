@@ -126,6 +126,8 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     elevatorWallBack->setOrigin(elevatorWallBack->getSize()*0.5f);
     //elevatorWallBack->move(-camera->getDirection()*elevatorWallBack->getSize().z*0.5f);
     elevatorWallBack->move(elevatorWallBack->getSize().x*0.5f, elevatorWallBack->getSize().y*0.37f, elevatorWallBack->getSize().x*0.2f);
+    elevatorWallBack->setColor(sf3d::Color(128, 128, 128));
+    elevatorFloor->setColor(sf3d::Color::White);
 }
 
 LS::Game::~Game()
@@ -178,9 +180,7 @@ bool LS::Game::playerShoot()
     }
     if (player->shoot())
     {
-        sf3d::Vector3f center = window->getView().getCenter();
-        sf3d::Color color = sf3d::Color::White;
-        sf3d::Vector2f mouse = sf3d::Vector2f(sf3d::Mouse::getPosition(*output))+(sf3d::Vector2f(center.x, center.y)-(window->getView().getSize()*0.5f));
+        std::cout << "bullet" << std::endl;
         return true;
     }
     return false;
@@ -259,6 +259,9 @@ bool LS::Game::playerDie()
 
 bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 {
+    sf3d::Vector3f center = window->getView().getCenter();
+    sf3d::Vector2f mouse = sf3d::Vector2f(sf3d::Mouse::getPosition(*output))+(sf3d::Vector2f(center.x, center.y)-(window->getView().getSize()*0.5f));
+
     turn += deltaTime;
 
     //shaftTop->setScale(turn, turn, turn);
@@ -295,7 +298,7 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
     window->setView(view);
     scene->setView(view);
     scene->clear(sf3d::Color::Transparent);
-    if (!player->update(scene, deltaTime))
+    if (!player->update(scene, deltaTime, mouse))
     {
         return false;
     }

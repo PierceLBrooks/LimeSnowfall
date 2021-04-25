@@ -17,7 +17,9 @@ LS::Player::Player(Game* owner) :
     briefcase(false),
     limit(240.0f),
     speed(500.0f),
-    gravity(5000.0f)
+    gravity(5000.0f),
+    health(5),
+    reload(0.0f)
 {
     center = sf3d::Vector2f(owner->getWindow()->getSize())*0.5f;
     animationSize = sf3d::Vector2i(80, 80);
@@ -88,6 +90,10 @@ LS::Player::Player(Game* owner) :
     briefcaseTextureRight->loadFromImage(*briefcaseImageRight);
     offhandBriefcase = new sf3d::Sprite(*briefcaseTextureRight);
     offhandTorch = new sf3d::Sprite(*torchTextureRight);
+    shotBuffer = new sf3d::SoundBuffer();
+    shotBuffer->loadFromFile("./Assets/shot.wav");
+    shotSound = new sf3d::Sound();
+    shotSound->setBuffer(*shotBuffer);
 }
 
 LS::Player::~Player()
@@ -112,22 +118,46 @@ LS::Player::~Player()
     delete briefcaseImageRight;
     delete briefcaseTextureLeft;
     delete briefcaseImageLeft;
+    delete shotSound;
+    delete shotBuffer;
 }
 
 bool LS::Player::shoot()
 {
     std::cout << "shoot" << std::endl;
-    return false;
+    if (health <= 0)
+    {
+        return false;
+    }
+    if (reload > 0.0f)
+    {
+        return false;
+    }
+    if ((facing > 0) != (mouse.x > sprite->getPosition().x))
+    {
+        return false;
+    }
+    reload = 0.25f;
+    shotSound->play();
+    return true;
 }
 
 void LS::Player::move(const sf3d::Vector2i& movement)
 {
+    if (health <= 0)
+    {
+        return;
+    }
     this->movement = movement;
 }
 
 bool LS::Player::jump()
 {
     std::cout << "jump" << std::endl;
+    if (health <= 0)
+    {
+        return false;
+    }
     if (airborne)
     {
         return false;
@@ -141,6 +171,10 @@ bool LS::Player::jump()
 bool LS::Player::pickup()
 {
     std::cout << "pickup" << std::endl;
+    if (health <= 0)
+    {
+        return false;
+    }
     if (airborne)
     {
         return false;
@@ -158,6 +192,10 @@ bool LS::Player::pickup()
 bool LS::Player::drop()
 {
     std::cout << "drop" << std::endl;
+    if (health <= 0)
+    {
+        return false;
+    }
     if (!briefcase)
     {
         return false;
@@ -170,6 +208,10 @@ bool LS::Player::drop()
 
 bool LS::Player::die()
 {
+    if (health > 0)
+    {
+        return false;
+    }
     std::cout << "die" << std::endl;
     owner->act(Game::Action::DIE);
     return true;
@@ -185,8 +227,17 @@ sf3d::Sprite* LS::Player::getSprite() const
     return sprite;
 }
 
-bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
+bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d::Vector2f& mouse)
 {
+    if (health <= 0)
+    {
+        return false;
+    }
+    if (reload > 0)
+    {
+        reload -= deltaTime;
+    }
+    this->mouse = mouse;
     animation += deltaTime*static_cast<float>(animations[animationIndex].size());
     if (airborne)
     {
@@ -256,6 +307,26 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
     hand->setPosition(sprite->getPosition());
     hand->setScale(sprite->getScale());
     hand->move((scale.x*handOffset.x*static_cast<float>((facing>0)?0.5f:2.5f))-(handOffset.x*scale.x*1.5f), (scale.y*handOffset.y)-(sprite->getOrigin().y*2.5f));
+    if ((facing > 0) != (mouse.x > sprite->getPosition().x))
+    {
+        hand->setRotation(0.0f);
+    }
+    else
+    {
+        float angle = (atan2f(mouse.y-(sprite->getPosition().y-(sprite->getOrigin().y)), mouse.x-(sprite->getPosition().x))*(180.0f/pi))+((facing>0)?0.0f:180.0f);
+        //angle += 90.0f;
+        hand->setRotation(angle);
+        angle *= pi/180.0f;
+        angle = fmodf(angle, pi*2.0f);
+        while (angle < 0.0f)
+        {
+            angle += pi*2.0f;
+        }
+        float rotation = angle;
+        angle = pi-fabsf(angle-pi);
+        //hand->move(-cosf(rotation)*(angle/pi)*scale.x*50.0f, -sinf(rotation)*(angle/pi)*scale.y*25.f);
+        std::cout << rotation << std::endl;
+    }
     window->draw(*hand);
     window->draw(*sprite);
     if (briefcase)
@@ -274,6 +345,15 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
         offhandTorch->setScale(sprite->getScale());
         offhandTorch->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
         offhandTorch->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f), scale.y*offhandOffset.y);
+        if ((facing > 0) != (mouse.x > sprite->getPosition().x))
+        {
+            offhandTorch->setRotation(0.0f);
+        }
+        else
+        {
+            float angle = (atan2f(mouse.y-(sprite->getPosition().y-(sprite->getOrigin().y)), mouse.x-(sprite->getPosition().x))*(180.0f/pi))+((facing>0)?0.0f:180.0f);
+            offhandTorch->setRotation(angle);
+        }
         window->draw(*offhandTorch);
     }
     if (!airborne)
