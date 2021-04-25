@@ -4,6 +4,7 @@
 #ifndef LS_PLAYER_HPP
 #define LS_PLAYER_HPP
 
+#include <LS/Shooter.hpp>
 #include <LS/Ownable.hpp>
 #include <SFML3D/System/Vector2.hpp>
 #include <SFML3D/Graphics/Image.hpp>
@@ -16,21 +17,22 @@ namespace LS
 {
     class Game;
 
-    class Player : public Ownable<Game*>
+    class Player : public Ownable<Game*>, public Shooter
     {
         public:
             Player(Game* owner);
             virtual ~Player();
-            bool shoot();
+            bool shoot(float& angle);
             bool jump();
             bool pickup();
             bool drop();
             bool die();
-            void move(const sf3d::Vector2i& movement);
+            void go(const sf3d::Vector2i& movement);
             Game* getOwner() const;
             sf3d::Sprite* getSprite() const;
             bool update(sf3d::RenderTexture* window, float deltaTime, const sf3d::Vector2f& mouse);
         private:
+            float getAngle() const;
             Game* owner;
             sf3d::SoundBuffer* shotBuffer;
             sf3d::Sound* shotSound;

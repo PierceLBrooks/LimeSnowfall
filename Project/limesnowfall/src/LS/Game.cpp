@@ -6,8 +6,6 @@
 #include <LS/Game.hpp>
 #include <iostream>
 
-#define PI (22.0f/7.0f)
-
 LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
 {
     sf3d::Vector2f center;
@@ -34,6 +32,20 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     cameraLight->setLinearAttenuation(0.02f);
     cameraLight->setQuadraticAttenuation(0.005f);
     cameraLight->enable();
+    lightLeft = new sf3d::Light();
+    lightLeft->setColor(sf3d::Color::White);
+    lightLeft->setAmbientIntensity(0.0f);
+    lightLeft->setDiffuseIntensity(1.0f);
+    lightLeft->setLinearAttenuation(0.02f);
+    lightLeft->setQuadraticAttenuation(0.005f);
+    lightLeft->enable();
+    lightRight = new sf3d::Light();
+    lightRight->setColor(sf3d::Color::White);
+    lightRight->setAmbientIntensity(0.0f);
+    lightRight->setDiffuseIntensity(1.0f);
+    lightRight->setLinearAttenuation(0.02f);
+    lightRight->setQuadraticAttenuation(0.005f);
+    lightRight->enable();
     sf3d::Light::enableLighting();
 
     float aspectRatio = static_cast<float>(output->getSize().x) / static_cast<float>(output->getSize().y);
@@ -74,7 +86,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     shaftBottom->setScale(15.0f, 15.0f, 15.0f);
     shaftBottom->setPosition(0.0f, 0.0f, 5.0f);
 
-    turn = 1.0f;
+    life = 1.0f;
 
     view = output->getDefaultView();
 
@@ -128,10 +140,29 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     elevatorWallBack->move(elevatorWallBack->getSize().x*0.5f, elevatorWallBack->getSize().y*0.37f, elevatorWallBack->getSize().x*0.2f);
     elevatorWallBack->setColor(sf3d::Color(128, 128, 128));
     elevatorFloor->setColor(sf3d::Color::White);
+
+    ballLeft = new sf3d::SphericalPolyhedron();
+    ballLeft->setRadius(0.5f);
+    ballLeft->setColor(sf3d::Color::White);
+    ballLeft->setPosition(sf3d::Vector3f(-10.0f, 0.0f, 0.0f));
+    ballRight = new sf3d::SphericalPolyhedron();
+    ballRight->setRadius(0.5f);
+    ballRight->setColor(sf3d::Color::White);
+    ballRight->setPosition(sf3d::Vector3f(10.0f, 0.0f, 0.0f));
 }
 
 LS::Game::~Game()
 {
+    for (unsigned int i = 0; i != bullets.size(); ++i)
+    {
+        delete bullets[i];
+    }
+    bullets.clear();
+    for (unsigned int i = 0; i != enemies.size(); ++i)
+    {
+        delete enemies[i];
+    }
+    enemies.clear();
     delete shaftTop;
     delete shaftBottom;
     delete axisX;
@@ -148,6 +179,10 @@ LS::Game::~Game()
     delete elevatorWallLeft;
     delete elevatorWallRight;
     delete elevatorWallBack;
+    delete ballLeft;
+    delete ballRight;
+    delete lightLeft;
+    delete lightRight;
 }
 
 bool LS::Game::act(Action action)
@@ -174,13 +209,15 @@ bool LS::Game::act(Action action)
 
 bool LS::Game::playerShoot()
 {
+    float angle = 0.0f;
     if (window == nullptr)
     {
         return false;
     }
-    if (player->shoot())
+    if (player->shoot(angle))
     {
         std::cout << "bullet" << std::endl;
+        bullets.push_back(new Bullet(player, angle*(pi/180.0f)));
         return true;
     }
     return false;
@@ -188,7 +225,7 @@ bool LS::Game::playerShoot()
 
 bool LS::Game::playerMove(const sf3d::Vector2i& movement)
 {
-    player->move(movement);
+    player->go(movement);
     return true;
 }
 
@@ -259,19 +296,26 @@ bool LS::Game::playerDie()
 
 bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 {
+    float gravity = 250.0f;
     sf3d::Vector3f center = window->getView().getCenter();
     sf3d::Vector2f mouse = sf3d::Vector2f(sf3d::Mouse::getPosition(*output))+(sf3d::Vector2f(center.x, center.y)-(window->getView().getSize()*0.5f));
 
-    turn += deltaTime;
-
-    //shaftTop->setScale(turn, turn, turn);
-    //shaftBottom->setScale(turn, turn, turn);
+    life += deltaTime;
 
     this->window = window;
 
     window->setView(*camera);
 
+    ballLeft->move(sf3d::Vector3f(0.0f, deltaTime*gravity, 0.0f));
+    ballRight->move(sf3d::Vector3f(0.0f, deltaTime*gravity, 0.0f));
+    if (ballLeft->getPosition().y > gravity)
+    {
+        ballLeft->setPosition(sf3d::Vector3f(ballLeft->getPosition().x, -ballLeft->getPosition().y, ballLeft->getPosition().z));
+        ballRight->setPosition(sf3d::Vector3f(ballRight->getPosition().x, -ballRight->getPosition().y, ballRight->getPosition().z));
+    }
     cameraLight->setPosition(camera->getPosition());
+    lightLeft->setPosition(ballLeft->getPosition());
+    lightRight->setPosition(ballRight->getPosition());
 
     /*
     window->draw(*axisX);
@@ -281,6 +325,9 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 
     window->draw(*shaftTop);
     window->draw(*shaftBottom);
+
+    window->draw(*ballLeft);
+    window->draw(*ballRight);
 
     window->draw(*elevatorWallBack);
     window->draw(*elevatorFloor);
@@ -298,6 +345,26 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
     window->setView(view);
     scene->setView(view);
     scene->clear(sf3d::Color::Transparent);
+    for (int i = 0; i != bullets.size(); ++i)
+    {
+        if (!bullets[i]->update(scene, deltaTime))
+        {
+            std::cout << "expire" << std::endl;
+            bullets.erase(bullets.begin()+i);
+            --i;
+            continue;
+        }
+    }
+    for (int i = 0; i != enemies.size(); ++i)
+    {
+        if (!enemies[i]->update(scene, deltaTime, player))
+        {
+            std::cout << "kill" << std::endl;
+            enemies.erase(enemies.begin()+i);
+            --i;
+            continue;
+        }
+    }
     if (!player->update(scene, deltaTime, mouse))
     {
         return false;
@@ -306,7 +373,6 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
     //frame->setPosition(camera->getPosition());
     //frame->move(camera->getDirection()*deltaTime);
     //frame->move(0.0f, -deltaTime, 0.0f);
-    //frame->setScale(turn, turn, turn);
     //frame->setRotation(-turn, sf3d::Vector3f(0.0f, 0.0f, 1.0f));
     sf3d::Light::enableLighting();
     window->enableDepthTest(true);

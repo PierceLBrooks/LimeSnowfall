@@ -5,10 +5,9 @@
 #include <LS/Game.hpp>
 #include <iostream>
 
-#define PI (22.0f/7.0f)
-
 LS::Player::Player(Game* owner) :
     Ownable<Game*>(),
+    Shooter(),
     owner(owner),
     movement(0, 0),
     facing(1),
@@ -122,7 +121,7 @@ LS::Player::~Player()
     delete shotBuffer;
 }
 
-bool LS::Player::shoot()
+bool LS::Player::shoot(float& angle)
 {
     std::cout << "shoot" << std::endl;
     if (health <= 0)
@@ -133,16 +132,21 @@ bool LS::Player::shoot()
     {
         return false;
     }
-    if ((facing > 0) != (mouse.x > sprite->getPosition().x))
+    if (((facing > 0) != (mouse.x > sprite->getPosition().x)) || (mouse.y > (sprite->getPosition().y-(sprite->getOrigin().y))))
     {
         return false;
     }
     reload = 0.25f;
     shotSound->play();
+    angle = getAngle();
+    if (facing < 0)
+    {
+        angle += 180.0f;
+    }
     return true;
 }
 
-void LS::Player::move(const sf3d::Vector2i& movement)
+void LS::Player::go(const sf3d::Vector2i& movement)
 {
     if (health <= 0)
     {
@@ -313,7 +317,7 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
     }
     else
     {
-        float angle = (atan2f(mouse.y-(sprite->getPosition().y-(sprite->getOrigin().y)), mouse.x-(sprite->getPosition().x))*(180.0f/pi))+((facing>0)?0.0f:180.0f);
+        float angle = getAngle();
         hand->setRotation(angle);
     }
     window->draw(*hand);
@@ -340,7 +344,7 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
         }
         else
         {
-            float angle = (atan2f(mouse.y-(sprite->getPosition().y-(sprite->getOrigin().y)), mouse.x-(sprite->getPosition().x))*(180.0f/pi))+((facing>0)?0.0f:180.0f);
+            float angle = getAngle();
             offhandTorch->setRotation(angle);
         }
         window->draw(*offhandTorch);
@@ -350,5 +354,12 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
         motion = movement.x;
         movement = sf3d::Vector2i();
     }
+    setPosition(sprite->getPosition());
+    move(sf3d::Vector3f(0.0f, -sprite->getOrigin().y*2.0f, 0.0f));
     return true;
+}
+
+float LS::Player::getAngle() const
+{
+    return (atan2f(mouse.y-(sprite->getPosition().y-(sprite->getOrigin().y)), mouse.x-(sprite->getPosition().x))*(180.0f/pi))+((facing>0)?0.0f:180.0f);
 }

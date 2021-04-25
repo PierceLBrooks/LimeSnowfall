@@ -18,22 +18,24 @@ void report(const sf3d::Vector2f& target)
 
 int main(int argc, char** argv)
 {
+    sf3d::View view;
     sf3d::Vector2f center;
     float deltaTime;
+    bool focus;
     Application* application;
     sf3d::Clock* clock = new sf3d::Clock();
     sf3d::RenderWindow* window = new sf3d::RenderWindow();
     sf3d::RenderTexture* output = new sf3d::RenderTexture();
     sf3d::Sprite* frame = new sf3d::Sprite();
-    auto resolutions = sf3d::VideoMode::getFullscreenModes();
-    window->create(resolutions[resolutions.size()/2], "Lime Snowfall");
+    window->create(sf3d::VideoMode(1280, 720), "Lime Snowfall", sf3d::Style::None);
     window->setVerticalSyncEnabled(true);
     output->create(window->getSize().x, window->getSize().y, true);
     output->enableDepthTest(true);
     application = new Application(window);
     frame->setTexture(output->getTexture());
+    view = window->getDefaultView();
+    focus = true;
     clock->restart();
-    sf3d::View view = window->getDefaultView();
     while (window->isOpen())
     {
         sf3d::Event event;
@@ -43,6 +45,12 @@ int main(int argc, char** argv)
             {
                 case sf3d::Event::Closed:
                     window->close();
+                    break;
+                case sf3d::Event::GainedFocus:
+                    focus = true;
+                    break;
+                case sf3d::Event::LostFocus:
+                    focus = false;
                     break;
             }
         }
@@ -76,13 +84,23 @@ int main(int argc, char** argv)
         }
         deltaTime = clock->restart().asSeconds();
         output->setView(view);
-        if (application->update(output, deltaTime))
+        if (focus)
         {
-            output->display();
-            window->draw(*frame);
-            window->display();
-            if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Escape))
+            if (application->update(output, deltaTime))
             {
+                output->display();
+                window->draw(*frame);
+                window->display();
+                if (sf3d::Keyboard::isKeyPressed(sf3d::Keyboard::Key::Escape))
+                {
+                    window->close();
+                }
+            }
+            else
+            {
+                output->display();
+                window->draw(*frame);
+                window->display();
                 window->close();
             }
         }
@@ -91,7 +109,6 @@ int main(int argc, char** argv)
             output->display();
             window->draw(*frame);
             window->display();
-            window->close();
         }
     }
     delete clock;
