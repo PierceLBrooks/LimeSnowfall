@@ -15,13 +15,15 @@ LS::Player::Player(Game* owner) :
     limit(240.0f),
     speed(500.0f),
     gravity(5000.0f),
-    health(5),
     reload(0.0f)
 {
     center = sf3d::Vector2f(owner->getWindow()->getSize())*0.5f;
     animationSize = sf3d::Vector2i(80, 80);
     animationIndex = 0;
     animation = 0.0f;
+    heal = 0.0f;
+    healthMax = 10;
+    health = healthMax;
     pi = PI;
     handOffset = sf3d::Vector2f(-10.0f, -2.0f);
     offhandOffset = sf3d::Vector2f(-10.0f, -2.0f);
@@ -99,6 +101,10 @@ LS::Player::Player(Game* owner) :
     dieBuffer->loadFromFile("./Assets/snowden_die.wav");
     dieSound = new sf3d::Sound();
     dieSound->setBuffer(*dieBuffer);
+    healthBar = new sf3d::RectangleShape();
+    healthBar->setFillColor(sf3d::Color::Green);
+    healthBar->setSize(sf3d::Vector3f(250.0f, 25.0f, 5.0f));
+    healthBar->setOrigin(healthBar->getSize()*0.5f);
 }
 
 LS::Player::~Player()
@@ -127,6 +133,9 @@ LS::Player::~Player()
     delete shotBuffer;
     delete hurtSound;
     delete hurtBuffer;
+    delete dieSound;
+    delete dieBuffer;
+    delete healthBar;
 }
 
 bool LS::Player::shoot(float& angle)
@@ -320,6 +329,22 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
                                              sprite->getTextureRect().width,
                                              sprite->getTextureRect().height));
     }
+    if (briefcase)
+    {
+        if (health < healthMax)
+        {
+            heal += deltaTime;
+            while (heal > 1.0f)
+            {
+                heal -= 1.0f;
+                if (health < healthMax)
+                {
+                    std::cout << "heal" << std::endl;
+                    ++health;
+                }
+            }
+        }
+    }
     if (airborne)
     {
         velocity.y += gravity*deltaTime;
@@ -393,6 +418,10 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
     setPosition(sprite->getPosition());
     setRotation(sprite->getRotation());
     move(sf3d::Vector3f(0.0f, -sprite->getOrigin().y*2.0f, 0.0f));
+    healthBar->setPosition(sf3d::Vector3f(center.x, center.y*1.9f, getPosition().z));
+    healthBar->setSize(sf3d::Vector3f(250.0f*(static_cast<float>(health)/static_cast<float>(healthMax)), 25.0f, 5.0f));
+    healthBar->setOrigin(healthBar->getSize()*0.5f);
+    window->draw(*healthBar);
     return true;
 }
 
