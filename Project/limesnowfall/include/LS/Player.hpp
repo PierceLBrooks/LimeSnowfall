@@ -10,6 +10,7 @@
 #include <SFML3D/Graphics/Image.hpp>
 #include <SFML3D/Graphics/Texture.hpp>
 #include <SFML3D/Graphics/Sprite.hpp>
+#include <SFML3D/Graphics/RectangleShape.hpp>
 #include <SFML3D/Audio/SoundBuffer.hpp>
 #include <SFML3D/Audio/Sound.hpp>
 
@@ -34,6 +35,7 @@ namespace LS
         private:
             float getAngle() const;
             Game* owner;
+            sf3d::RectangleShape* healthBar;
             sf3d::SoundBuffer* dieBuffer;
             sf3d::Sound* dieSound;
             sf3d::SoundBuffer* hurtBuffer;
@@ -76,9 +78,11 @@ namespace LS
             float limit;
             float pi;
             float reload;
+            float heal;
             int facing;
             int motion;
             int health;
+            int healthMax;
             bool briefcase;
             bool airborne;
     };

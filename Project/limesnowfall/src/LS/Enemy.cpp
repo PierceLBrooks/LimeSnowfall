@@ -43,6 +43,10 @@ LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, in
     {
         target = 180.0f;
     }
+    if (sounds[3] != nullptr)
+    {
+        sounds[3]->play();
+    }
 }
 
 LS::Enemy::~Enemy()
@@ -115,6 +119,16 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
     }
     else
     {
+        if (!sounds.empty())
+        {
+            if (sounds[3] != nullptr)
+            {
+                if (sounds[3]->getStatus() == sf3d::SoundSource::Status::Playing)
+                {
+                    sounds[3]->stop();
+                }
+            }
+        }
         if (health <= 0)
         {
             for (unsigned int i = 0; i != sounds.size(); ++i)
@@ -179,18 +193,19 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
                     //std::cout << angle << " " << target << " " << difference << std::endl;
                     if (fabsf((target+difference)-angle) < fabsf((target-difference)-angle))
                     {
-                        target += difference*deltaTime;
+                        target += difference*deltaTime*2.0f;
                     }
                     else
                     {
-                        target -= difference*deltaTime;
+                        target -= difference*deltaTime*2.0f;
                     }
-                    if (fabsf(difference) < 5.0f)
+                    if (fabsf(difference) < 7.5f)
                     {
                         aim += deltaTime;
-                        if (aim > 1.0f)
+                        if (aim > 0.25f)
                         {
-                            shoot = aim;
+                            aim -= 0.25f;
+                            shoot = 1.0f;
                             if (!sounds.empty())
                             {
                                 if (sounds[0] != nullptr)

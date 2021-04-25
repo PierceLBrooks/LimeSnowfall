@@ -22,6 +22,8 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     enemySoundBuffers.back()->loadFromFile("./Assets/specops_hurt.wav");
     enemySoundBuffers.push_back(new sf3d::SoundBuffer());
     enemySoundBuffers.back()->loadFromFile("./Assets/specops_die.wav");
+    enemySoundBuffers.push_back(new sf3d::SoundBuffer());
+    enemySoundBuffers.back()->loadFromFile("./Assets/rope.wav");
 
     enemyImageLeft = new sf3d::Image();
     enemyImageLeft->loadFromFile("./Assets/specops.png");

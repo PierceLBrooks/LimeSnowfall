@@ -244,7 +244,7 @@ bool LS::Player::hurt(Bullet* bullet)
     }
     if (hurtSound->getStatus() != sf3d::SoundSource::Status::Playing)
     {
-        //--health;
+        --health;
         if (health <= 0)
         {
             die();
