@@ -52,6 +52,7 @@ namespace LS
             sf3d::Sprite* offhandBriefcase;
             sf3d::Vector2f handOffset;
             sf3d::Vector2f offhandOffset;
+            sf3d::Vector2f velocity;
             sf3d::Vector2f center;
             sf3d::Vector2f scale;
             sf3d::Vector2i movement;
@@ -59,9 +60,12 @@ namespace LS
             std::vector<std::vector<sf3d::Vector2i>> animations;
             unsigned int animationIndex;
             float animation;
+            float gravity;
+            float speed;
             float limit;
             float pi;
             int facing;
+            int motion;
             bool briefcase;
             bool airborne;
     };

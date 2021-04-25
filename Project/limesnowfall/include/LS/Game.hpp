@@ -61,6 +61,10 @@ namespace LS
             sf3d::Billboard* frame;
             sf3d::RenderTexture* scene;
             sf3d::Cuboid* briefcase;
+            sf3d::Cuboid* elevatorFloor;
+            sf3d::Cuboid* elevatorWallLeft;
+            sf3d::Cuboid* elevatorWallRight;
+            sf3d::Cuboid* elevatorWallBack;
             Object* shaftBottom;
             Object* shaftTop;
             sf3d::View view;

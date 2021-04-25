@@ -66,12 +66,12 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     shaftTop = new Object();
     shaftTop->loadFromFile("./Assets/shaft.obj");
     shaftTop->setRotation(180.0f, sf3d::Vector3f(0.0f, 0.0f, 1.0f));
-    shaftTop->setScale(10.0f, 10.0f, 10.0f);
+    shaftTop->setScale(15.0f, 15.0f, 15.0f);
     shaftTop->setPosition(0.0f, 0.0f, 5.0f);
     shaftBottom = new Object();
     shaftBottom->loadFromFile("./Assets/shaft.obj");
     shaftBottom->setRotation(0.0f, sf3d::Vector3f(0.0f, 1.0f, 0.0f));
-    shaftBottom->setScale(10.0f, 10.0f, 10.0f);
+    shaftBottom->setScale(15.0f, 15.0f, 15.0f);
     shaftBottom->setPosition(0.0f, 0.0f, 5.0f);
 
     turn = 1.0f;
@@ -91,11 +91,41 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     frame->setOrigin(sf3d::Vector3f(center.x, center.y, 0.0f));
 
     briefcase = new sf3d::Cuboid();
-    briefcase->setColor(sf3d::Color::White);
+    briefcase->setColor(sf3d::Color(64, 64, 64));
     briefcase->setPosition(light->getPosition());
-    briefcase->setSize(sf3d::Vector3f(0.5f, 0.5f, 0.5f));
+    briefcase->setSize(sf3d::Vector3f(0.5f, 0.35f, 0.5f));
     briefcase->setOrigin(briefcase->getSize()*0.5f);
     briefcase->move(-camera->getDirection()*15.0f);
+    briefcase->move(sf3d::Vector3f(0.0f, -0.8f, 0.0f));
+
+    elevatorFloor = new sf3d::Cuboid();
+    elevatorFloor->setColor(sf3d::Color(144, 144, 144));
+    elevatorFloor->setPosition(light->getPosition());
+    elevatorFloor->setSize(sf3d::Vector3f(30.0f, 1.0f, 100.0f));
+    elevatorFloor->setOrigin(elevatorFloor->getSize()*0.5f);
+    elevatorFloor->move(-camera->getDirection()*elevatorFloor->getSize().z*0.5f);
+    elevatorFloor->move(elevatorFloor->getSize().x*0.5f, -10.0f, -elevatorFloor->getSize().z*0.1f);
+    elevatorWallLeft = new sf3d::Cuboid();
+    elevatorWallLeft->setColor(elevatorFloor->getColor());
+    elevatorWallLeft->setPosition(light->getPosition());
+    elevatorWallLeft->setSize(sf3d::Vector3f(1.0f, 3.0f, 100.0f));
+    elevatorWallLeft->setOrigin(elevatorWallLeft->getSize()*0.5f);
+    elevatorWallLeft->move(-camera->getDirection()*elevatorWallLeft->getSize().z*0.5f);
+    elevatorWallLeft->move(-3.0f, elevatorWallLeft->getSize().y*0.5f, elevatorWallLeft->getSize().z*0.55f);
+    elevatorWallRight = new sf3d::Cuboid();
+    elevatorWallRight->setColor(elevatorFloor->getColor());
+    elevatorWallRight->setPosition(light->getPosition());
+    elevatorWallRight->setSize(sf3d::Vector3f(1.0f, 3.0f, 100.0f));
+    elevatorWallRight->setOrigin(elevatorWallRight->getSize()*0.5f);
+    elevatorWallRight->move(-camera->getDirection()*elevatorWallRight->getSize().z*0.5f);
+    elevatorWallRight->move(4.0f, elevatorWallRight->getSize().y*0.5f, elevatorWallRight->getSize().z*0.55f);
+    elevatorWallBack = new sf3d::Cuboid();
+    elevatorWallBack->setColor(elevatorFloor->getColor());
+    elevatorWallBack->setPosition(light->getPosition());
+    elevatorWallBack->setSize(sf3d::Vector3f(100.0f, 3.0f, 1.0f));
+    elevatorWallBack->setOrigin(elevatorWallBack->getSize()*0.5f);
+    //elevatorWallBack->move(-camera->getDirection()*elevatorWallBack->getSize().z*0.5f);
+    elevatorWallBack->move(elevatorWallBack->getSize().x*0.5f, elevatorWallBack->getSize().y*0.37f, elevatorWallBack->getSize().x*0.2f);
 }
 
 LS::Game::~Game()
@@ -112,6 +142,10 @@ LS::Game::~Game()
     delete frame;
     delete scene;
     delete briefcase;
+    delete elevatorFloor;
+    delete elevatorWallLeft;
+    delete elevatorWallRight;
+    delete elevatorWallBack;
 }
 
 bool LS::Game::act(Action action)
@@ -168,8 +202,8 @@ bool LS::Game::playerPickup()
     {
         return false;
     }
-    std::cout << (player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))*0.25f << " " << briefcase->getPosition().x << std::endl;
-    if (fabsf(((player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))*0.25f)-(briefcase->getPosition().x)) > 54.0f)
+    std::cout << (player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/32.0f << " " << briefcase->getPosition().x*4.0f << std::endl;
+    if (fabsf(((player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/32.0f)-(briefcase->getPosition().x*4.0f)) > 4.0f)
     {
         return false;
     }
@@ -197,12 +231,12 @@ bool LS::Game::playerDrop()
         return false;
     }
     briefcase = new sf3d::Cuboid();
-    briefcase->setColor(sf3d::Color::White);
+    briefcase->setColor(sf3d::Color(64, 64, 64));
     briefcase->setPosition(light->getPosition());
-    briefcase->setSize(sf3d::Vector3f(0.5f, 0.5f, 0.5f));
+    briefcase->setSize(sf3d::Vector3f(0.5f, 0.35f, 0.5f));
     briefcase->setOrigin(briefcase->getSize()*0.5f);
     briefcase->move(-camera->getDirection()*15.0f);
-    briefcase->move(sf3d::Vector3f((player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/480.0f, 0.0f, 0.0f));
+    briefcase->move(sf3d::Vector3f((player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/480.0f, -0.8f, 0.0f));
     briefcase->setPosition(sf3d::Vector3f(briefcase->getPosition().x*4.0f, briefcase->getPosition().y, briefcase->getPosition().z));
     std::cout << briefcase->getPosition().x << std::endl;
     return true;
@@ -244,6 +278,11 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 
     window->draw(*shaftTop);
     window->draw(*shaftBottom);
+
+    window->draw(*elevatorWallBack);
+    window->draw(*elevatorFloor);
+    window->draw(*elevatorWallLeft);
+    window->draw(*elevatorWallRight);
 
     if (briefcase != nullptr)
     {

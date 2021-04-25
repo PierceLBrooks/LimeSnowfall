@@ -12,18 +12,21 @@ LS::Player::Player(Game* owner) :
     owner(owner),
     movement(0, 0),
     facing(1),
+    motion(0),
     airborne(false),
     briefcase(false),
-    limit(240.0f)
+    limit(240.0f),
+    speed(500.0f),
+    gravity(5000.0f)
 {
     center = sf3d::Vector2f(owner->getWindow()->getSize())*0.5f;
     animationSize = sf3d::Vector2i(80, 80);
     animationIndex = 0;
     animation = 0.0f;
     pi = PI;
-    handOffset = sf3d::Vector2f(-10.0f, -20.0f);
-    offhandOffset = sf3d::Vector2f(-10.0f, -20.0f);
-    scale = sf3d::Vector2f(1.0f, 1.0f)*5.0f;
+    handOffset = sf3d::Vector2f(-10.0f, -2.0f);
+    offhandOffset = sf3d::Vector2f(-10.0f, -2.0f);
+    scale = sf3d::Vector2f(1.0f, 1.0f)*3.5f;
     imageLeft = new sf3d::Image();
     imageLeft->loadFromFile("./Assets/snowden.png");
     imageLeft->flipHorizontally();
@@ -37,7 +40,7 @@ LS::Player::Player(Game* owner) :
     sprite->setOrigin(sf3d::Vector2f(animationSize)*0.5f);
     sprite->setOrigin(sprite->getOrigin().x, sprite->getOrigin().y*2.0f);
     sprite->setScale(sf3d::Vector3f(scale.x, scale.y, 1.0f));
-    sprite->setPosition(center.x, center.y*1.5f);
+    sprite->setPosition(center.x, center.y*1.75f);
     animations.push_back(std::vector<sf3d::Vector2i>());
     animations.back().push_back(sf3d::Vector2i(3, 2));
     animations.back().push_back(sf3d::Vector2i(4, 2));
@@ -53,6 +56,8 @@ LS::Player::Player(Game* owner) :
     animations.back().push_back(sf3d::Vector2i(0, 0));
     animations.push_back(std::vector<sf3d::Vector2i>());
     animations.back().push_back(sf3d::Vector2i(0, 0));
+    animations.push_back(std::vector<sf3d::Vector2i>());
+    animations.back().push_back(sf3d::Vector2i(0, 1));
     gunImageLeft = new sf3d::Image();
     gunImageLeft->loadFromFile("./Assets/snowden_gun.png");
     gunImageLeft->flipHorizontally();
@@ -127,6 +132,8 @@ bool LS::Player::jump()
     {
         return false;
     }
+    velocity.x = static_cast<float>(motion)*speed;
+    velocity.y = -speed*2.5f;
     airborne = true;
     return true;
 }
@@ -181,21 +188,28 @@ sf3d::Sprite* LS::Player::getSprite() const
 bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
 {
     animation += deltaTime*static_cast<float>(animations[animationIndex].size());
-    if (movement.x != 0)
+    if (airborne)
     {
-        animationIndex = 0;
-        if (facing != movement.x)
-        {
-            facing = movement.x;
-            sprite->setTexture(*((facing>0)?textureRight:textureLeft));
-            hand->setTexture(*((facing>0)?gunTextureRight:gunTextureLeft));
-            offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
-            offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
-        }
+        animationIndex = 2;
     }
     else
     {
-        animationIndex = 1;
+        if (movement.x != 0)
+        {
+            animationIndex = 0;
+            if (facing != movement.x)
+            {
+                facing = movement.x;
+                sprite->setTexture(*((facing>0)?textureRight:textureLeft));
+                hand->setTexture(*((facing>0)?gunTextureRight:gunTextureLeft));
+                offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
+                offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
+            }
+        }
+        else
+        {
+            animationIndex = 1;
+        }
     }
     while (static_cast<int>(animation) >= static_cast<int>(animations[animationIndex].size()))
     {
@@ -216,7 +230,20 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
                                              sprite->getTextureRect().width,
                                              sprite->getTextureRect().height));
     }
-    sprite->move(sf3d::Vector2f(movement)*deltaTime*500.0f);
+    if (airborne)
+    {
+        velocity.y += gravity*deltaTime;
+        sprite->move(velocity*deltaTime);
+        if (sprite->getPosition().y > center.y*1.75f)
+        {
+            airborne = false;
+            sprite->setPosition(sprite->getPosition().x, center.y*1.75f);
+        }
+    }
+    else
+    {
+        sprite->move(sf3d::Vector2f(movement)*deltaTime*speed);
+    }
     if (sprite->getPosition().x-(0.5f*static_cast<float>(window->getSize().x)) > limit)
     {
         sprite->setPosition(limit+(0.5f*static_cast<float>(window->getSize().x)), sprite->getPosition().y);
@@ -229,26 +256,30 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
     hand->setPosition(sprite->getPosition());
     hand->setScale(sprite->getScale());
     hand->move((scale.x*handOffset.x*static_cast<float>((facing>0)?0.5f:2.5f))-(handOffset.x*scale.x*1.5f), (scale.y*handOffset.y)-(sprite->getOrigin().y*2.5f));
-    offhandBriefcase->setOrigin(sf3d::Vector3f(static_cast<float>(offhandBriefcase->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
-    offhandBriefcase->setPosition(sprite->getPosition());
-    offhandBriefcase->setScale(sprite->getScale());
-    offhandBriefcase->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
-    offhandTorch->setOrigin(sf3d::Vector3f(static_cast<float>(offhandTorch->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
-    offhandTorch->setPosition(sprite->getPosition());
-    offhandTorch->setScale(sprite->getScale());
-    offhandTorch->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
-    offhandBriefcase->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:0.125f))+(1.5f*static_cast<float>((facing>0)?offhandOffset.x:0.0f))), scale.y*(offhandOffset.y-2.5f));
-    offhandTorch->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f), scale.y*offhandOffset.y);
     window->draw(*hand);
     window->draw(*sprite);
     if (briefcase)
     {
+        offhandBriefcase->setOrigin(sf3d::Vector3f(static_cast<float>(offhandBriefcase->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
+        offhandBriefcase->setPosition(sprite->getPosition());
+        offhandBriefcase->setScale(sprite->getScale());
+        offhandBriefcase->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
+        offhandBriefcase->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:0.125f))+(1.5f*static_cast<float>((facing>0)?offhandOffset.x:0.0f))), scale.y*(offhandOffset.y-2.5f));
         window->draw(*offhandBriefcase);
     }
     else
     {
+        offhandTorch->setOrigin(sf3d::Vector3f(static_cast<float>(offhandTorch->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
+        offhandTorch->setPosition(sprite->getPosition());
+        offhandTorch->setScale(sprite->getScale());
+        offhandTorch->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
+        offhandTorch->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f), scale.y*offhandOffset.y);
         window->draw(*offhandTorch);
     }
-    movement = sf3d::Vector2i();
+    if (!airborne)
+    {
+        motion = movement.x;
+        movement = sf3d::Vector2i();
+    }
     return true;
 }
