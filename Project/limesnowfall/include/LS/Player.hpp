@@ -48,7 +48,8 @@ namespace LS
             sf3d::Image* briefcaseImageRight;
             sf3d::Texture* briefcaseTextureLeft;
             sf3d::Texture* briefcaseTextureRight;
-            sf3d::Sprite* offhand;
+            sf3d::Sprite* offhandTorch;
+            sf3d::Sprite* offhandBriefcase;
             sf3d::Vector2f handOffset;
             sf3d::Vector2f offhandOffset;
             sf3d::Vector2f center;

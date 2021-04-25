@@ -81,14 +81,8 @@ LS::Player::Player(Game* owner) :
     briefcaseImageRight->loadFromFile("./Assets/snowden_briefcase.png");
     briefcaseTextureRight = new sf3d::Texture();
     briefcaseTextureRight->loadFromImage(*briefcaseImageRight);
-    if (briefcase)
-    {
-        offhand = new sf3d::Sprite(*briefcaseTextureRight);
-    }
-    else
-    {
-        offhand = new sf3d::Sprite(*torchTextureRight);
-    }
+    offhandBriefcase = new sf3d::Sprite(*briefcaseTextureRight);
+    offhandTorch = new sf3d::Sprite(*torchTextureRight);
 }
 
 LS::Player::~Player()
@@ -99,7 +93,8 @@ LS::Player::~Player()
     delete textureLeft;
     delete imageLeft;
     delete hand;
-    delete offhand;
+    delete offhandTorch;
+    delete offhandBriefcase;
     delete gunTextureRight;
     delete gunImageRight;
     delete gunTextureLeft;
@@ -148,14 +143,8 @@ bool LS::Player::pickup()
         return false;
     }
     briefcase = true;
-    if (briefcase)
-    {
-        offhand->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
-    }
-    else
-    {
-        offhand->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
-    }
+    offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
+    offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
     return true;
 }
 
@@ -167,14 +156,8 @@ bool LS::Player::drop()
         return false;
     }
     briefcase = false;
-    if (briefcase)
-    {
-        offhand->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
-    }
-    else
-    {
-        offhand->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
-    }
+    offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
+    offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
     return true;
 }
 
@@ -206,14 +189,8 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
             facing = movement.x;
             sprite->setTexture(*((facing>0)?textureRight:textureLeft));
             hand->setTexture(*((facing>0)?gunTextureRight:gunTextureLeft));
-            if (briefcase)
-            {
-                offhand->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
-            }
-            else
-            {
-                offhand->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
-            }
+            offhandBriefcase->setTexture(*((facing>0)?briefcaseTextureRight:briefcaseTextureLeft));
+            offhandTorch->setTexture(*((facing>0)?torchTextureRight:torchTextureLeft));
         }
     }
     else
@@ -252,21 +229,26 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime)
     hand->setPosition(sprite->getPosition());
     hand->setScale(sprite->getScale());
     hand->move((scale.x*handOffset.x*static_cast<float>((facing>0)?0.5f:2.5f))-(handOffset.x*scale.x*1.5f), (scale.y*handOffset.y)-(sprite->getOrigin().y*2.5f));
-    offhand->setOrigin(sf3d::Vector3f(static_cast<float>(offhand->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
-    offhand->setPosition(sprite->getPosition());
-    offhand->setScale(sprite->getScale());
-    offhand->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
+    offhandBriefcase->setOrigin(sf3d::Vector3f(static_cast<float>(offhandBriefcase->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
+    offhandBriefcase->setPosition(sprite->getPosition());
+    offhandBriefcase->setScale(sprite->getScale());
+    offhandBriefcase->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
+    offhandTorch->setOrigin(sf3d::Vector3f(static_cast<float>(offhandTorch->getTexture()->getSize().x)*0.5f, 0.0f, 0.0f));
+    offhandTorch->setPosition(sprite->getPosition());
+    offhandTorch->setScale(sprite->getScale());
+    offhandTorch->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
+    offhandBriefcase->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:0.125f))+(1.5f*static_cast<float>((facing>0)?offhandOffset.x:0.0f))), scale.y*(offhandOffset.y-2.5f));
+    offhandTorch->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f), scale.y*offhandOffset.y);
+    window->draw(*hand);
+    window->draw(*sprite);
     if (briefcase)
     {
-        offhand->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:0.125f))+(1.5f*static_cast<float>((facing>0)?offhandOffset.x:0.0f))), scale.y*(offhandOffset.y-2.5f));
+        window->draw(*offhandBriefcase);
     }
     else
     {
-        offhand->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f), scale.y*offhandOffset.y);
+        window->draw(*offhandTorch);
     }
-    window->draw(*hand);
-    window->draw(*sprite);
-    window->draw(*offhand);
     movement = sf3d::Vector2i();
     return true;
 }
