@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     output->enableDepthTest(true);
     application = nullptr;
     frame->setTexture(output->getTexture());
-    frame->setColor(sf3d::Color(192, 192, 192));
+    frame->setColor(sf3d::Color(224, 192, 192));
     view = window->getDefaultView();
     focus = true;
     reset = 2.5f;

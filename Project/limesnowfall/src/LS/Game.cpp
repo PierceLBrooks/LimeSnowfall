@@ -52,7 +52,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     torchLight->setQuadraticAttenuation(0.05f);
     torchLight->setDirectional(true);
     torchLight->setDirection(sf3d::Vector3f(0.0f, 0.0f, 1.0f));
-    torchLight->setColor(sf3d::Color(128, 128, 128));
+    torchLight->setColor(sf3d::Color::Yellow);
     torchLight->enable();
     cameraLight = new sf3d::Light();
     cameraLight->setColor(sf3d::Color::White);
@@ -67,6 +67,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     lightLeft->setDiffuseIntensity(1.0f);
     lightLeft->setLinearAttenuation(0.02f);
     lightLeft->setQuadraticAttenuation(0.005f);
+    lightLeft->setColor(sf3d::Color::Green);
     lightLeft->enable();
     lightRight = new sf3d::Light();
     lightRight->setColor(sf3d::Color::White);
@@ -74,6 +75,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     lightRight->setDiffuseIntensity(1.0f);
     lightRight->setLinearAttenuation(0.02f);
     lightRight->setQuadraticAttenuation(0.005f);
+    lightRight->setColor(sf3d::Color::Green);
     lightRight->enable();
     sf3d::Light::enableLighting();
 
@@ -136,7 +138,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     frame->setOrigin(sf3d::Vector3f(center.x, center.y, 0.0f));
 
     briefcase = new sf3d::Cuboid();
-    briefcase->setColor(sf3d::Color(64, 64, 64));
+    briefcase->setColor(sf3d::Color(64, 64, 128));
     briefcase->setPosition(light->getPosition());
     briefcase->setSize(sf3d::Vector3f(0.5f, 0.35f, 0.5f));
     briefcase->setOrigin(briefcase->getSize()*0.5f);
@@ -150,6 +152,7 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     elevatorFloor->setOrigin(elevatorFloor->getSize()*0.5f);
     elevatorFloor->move(-camera->getDirection()*elevatorFloor->getSize().z*0.5f);
     elevatorFloor->move(elevatorFloor->getSize().x*0.5f, -10.0f, -elevatorFloor->getSize().z*0.1f);
+
     elevatorWallLeft = new sf3d::Cuboid();
     elevatorWallLeft->setColor(elevatorFloor->getColor());
     elevatorWallLeft->setPosition(light->getPosition());
@@ -176,11 +179,11 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
 
     ballLeft = new sf3d::SphericalPolyhedron();
     ballLeft->setRadius(0.5f);
-    ballLeft->setColor(sf3d::Color::White);
+    ballLeft->setColor(sf3d::Color::Green);
     ballLeft->setPosition(sf3d::Vector3f(-10.0f, 0.0f, 0.0f));
     ballRight = new sf3d::SphericalPolyhedron();
     ballRight->setRadius(0.5f);
-    ballRight->setColor(sf3d::Color::White);
+    ballRight->setColor(sf3d::Color::Green);
     ballRight->setPosition(sf3d::Vector3f(10.0f, 0.0f, 0.0f));
 }
 
@@ -310,7 +313,7 @@ bool LS::Game::playerDrop()
         return false;
     }
     briefcase = new sf3d::Cuboid();
-    briefcase->setColor(sf3d::Color(64, 64, 64));
+    briefcase->setColor(sf3d::Color(64, 64, 128));
     briefcase->setPosition(light->getPosition());
     briefcase->setSize(sf3d::Vector3f(0.5f, 0.35f, 0.5f));
     briefcase->setOrigin(briefcase->getSize()*0.5f);
@@ -450,7 +453,7 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
             torchLight->setQuadraticAttenuation(0.05f);
             torchLight->setDirectional(true);
             torchLight->setDirection(sf3d::Vector3f(0.0f, 0.0f, 1.0f));
-            torchLight->setColor(sf3d::Color(128, 128, 128));
+            torchLight->setColor(sf3d::Color::Yellow);
             torchLight->enable();
         }
         float torch = (player->getSprite()->getPosition().x-(0.5f*static_cast<float>(output->getSize().x)))/32.0f;

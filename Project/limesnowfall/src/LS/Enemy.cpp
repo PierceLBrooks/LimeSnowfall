@@ -23,7 +23,7 @@ LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, in
     sprite->setOrigin(sf3d::Vector2f(texture->getSize())*0.5f);
     sprite->setPosition(sf3d::Vector3f(axis, 0.0f, 0.0f));
     sprite->setScale(scale);
-    sprite->setColor(sf3d::Color(128, 128, 128));
+    sprite->setColor(sf3d::Color(128, 192, 128));
     sprite->move(sf3d::Vector3f(0.0f, -static_cast<float>(texture->getSize().y)*scale.y, 0.0f));
     rope = new sf3d::RectangleShape();
     rope->setFillColor(sf3d::Color(128, 128, 128));
@@ -227,16 +227,16 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
     {
         if ((facing > 0) != (player->getFacing() > 0))
         {
-            sprite->setColor(sf3d::Color::White);
+            sprite->setColor(sf3d::Color::Yellow);
         }
         else
         {
-            sprite->setColor(sf3d::Color(128, 128, 128));
+            sprite->setColor(sf3d::Color(128, 192, 128));
         }
     }
     else
     {
-        sprite->setColor(sf3d::Color(128, 128, 128));
+        sprite->setColor(sf3d::Color(128, 192, 128));
     }
     if ((health > 0) || (sprite->getPosition().y < goal))
     {
