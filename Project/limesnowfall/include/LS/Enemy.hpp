@@ -31,6 +31,7 @@ namespace LS
             int facing;
             int step;
             float goal;
+            float death;
             float life;
             float pi;
             float target;

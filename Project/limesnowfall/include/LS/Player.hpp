@@ -39,6 +39,8 @@ namespace LS
             float getAngle() const;
             Game* owner;
             sf3d::RectangleShape* healthBar;
+            sf3d::SoundBuffer* jumpBuffer;
+            sf3d::Sound* jumpSound;
             sf3d::SoundBuffer* dieBuffer;
             sf3d::Sound* dieSound;
             sf3d::SoundBuffer* hurtBuffer;
@@ -82,6 +84,7 @@ namespace LS
             float pi;
             float reload;
             float heal;
+            float life;
             int facing;
             int motion;
             int health;

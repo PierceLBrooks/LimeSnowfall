@@ -13,6 +13,7 @@ LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, in
     step = 0;
     health = 2;
     life = 0.0f;
+    death = 0.0f;
     target = 0.0f;
     shoot = 0.0f;
     aim = 0.0f;
@@ -22,6 +23,7 @@ LS::Enemy::Enemy(Game* owner, sf3d::Texture* texture, float axis, float goal, in
     sprite->setOrigin(sf3d::Vector2f(texture->getSize())*0.5f);
     sprite->setPosition(sf3d::Vector3f(axis, 0.0f, 0.0f));
     sprite->setScale(scale);
+    sprite->setColor(sf3d::Color(128, 128, 128));
     sprite->move(sf3d::Vector3f(0.0f, -static_cast<float>(texture->getSize().y)*scale.y, 0.0f));
     rope = new sf3d::RectangleShape();
     rope->setFillColor(sf3d::Color(128, 128, 128));
@@ -112,6 +114,7 @@ bool LS::Enemy::hurt(Bullet* bullet)
 
 bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* player)
 {
+    life += deltaTime;
     ++step;
     if (sprite->getPosition().y < goal)
     {
@@ -162,8 +165,8 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
                 sounds[i]->stop();
             }
             sprite->move(sf3d::Vector3f(0.0f, deltaTime*sprite->getScale().y*static_cast<float>(sprite->getTexture()->getSize().y)*5.0f, 0.0f));
-            life += deltaTime;
-            if ((sprite->getPosition().y > goal*25.0f) || (life > 2.5f))
+            death += deltaTime;
+            if ((sprite->getPosition().y > goal*25.0f) || (death > 2.5f))
             {
                 return false;
             }
@@ -175,7 +178,7 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
                 shoot -= deltaTime;
                 if (step%5 == 0)
                 {
-                    getOwner()->enemyShoot(this, target);
+                    getOwner()->enemyShoot(this, target+(sinf(life*pi*50.0f)*2.5f));
                 }
             }
             else
@@ -219,6 +222,21 @@ bool LS::Enemy::update(sf3d::RenderTexture* window, float deltaTime, Player* pla
                 }
             }
         }
+    }
+    if ((!player->getBriefcase()) && (!player->getAirborne()))
+    {
+        if ((facing > 0) != (player->getFacing() > 0))
+        {
+            sprite->setColor(sf3d::Color::White);
+        }
+        else
+        {
+            sprite->setColor(sf3d::Color(128, 128, 128));
+        }
+    }
+    else
+    {
+        sprite->setColor(sf3d::Color(128, 128, 128));
     }
     if ((health > 0) || (sprite->getPosition().y < goal))
     {

@@ -26,11 +26,12 @@ int main(int argc, char** argv)
     window->setVerticalSyncEnabled(true);
     output->create(window->getSize().x, window->getSize().y, true);
     output->enableDepthTest(true);
-    application = new Application(window);
+    application = nullptr;
     frame->setTexture(output->getTexture());
+    frame->setColor(sf3d::Color(192, 192, 192));
     view = window->getDefaultView();
     focus = true;
-    reset = 0.0f;
+    reset = 2.5f;
     clock->restart();
     while (window->isOpen())
     {

@@ -21,6 +21,7 @@ LS::Player::Player(Game* owner) :
     animationSize = sf3d::Vector2i(80, 80);
     animationIndex = 0;
     animation = 0.0f;
+    life = 0.0f;
     heal = 0.0f;
     healthMax = 10;
     health = healthMax;
@@ -101,6 +102,10 @@ LS::Player::Player(Game* owner) :
     dieBuffer->loadFromFile("./Assets/snowden_die.wav");
     dieSound = new sf3d::Sound();
     dieSound->setBuffer(*dieBuffer);
+    jumpBuffer = new sf3d::SoundBuffer();
+    jumpBuffer->loadFromFile("./Assets/jump.wav");
+    jumpSound = new sf3d::Sound();
+    jumpSound->setBuffer(*jumpBuffer);
     healthBar = new sf3d::RectangleShape();
     healthBar->setFillColor(sf3d::Color::Green);
     healthBar->setSize(sf3d::Vector3f(250.0f, 25.0f, 5.0f));
@@ -135,6 +140,8 @@ LS::Player::~Player()
     delete hurtBuffer;
     delete dieSound;
     delete dieBuffer;
+    delete jumpSound;
+    delete jumpBuffer;
     delete healthBar;
 }
 
@@ -175,6 +182,10 @@ bool LS::Player::shoot(float& angle)
     {
         angle += 180.0f;
     }
+    if (briefcase)
+    {
+        angle += sinf(life*pi*50.0f)*7.5f;
+    }
     return true;
 }
 
@@ -201,6 +212,10 @@ bool LS::Player::jump()
     velocity.x = static_cast<float>(motion)*speed;
     velocity.y = -speed*2.5f*((briefcase)?0.75f:1.0f);
     airborne = true;
+    if (jumpSound->getStatus() != sf3d::SoundSource::Status::Playing)
+    {
+        jumpSound->play();
+    }
     return true;
 }
 
@@ -294,6 +309,7 @@ sf3d::Sprite* LS::Player::getSprite() const
 
 bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d::Vector2f& mouse)
 {
+    life += deltaTime;
     if (health <= 0)
     {
         if (dieSound->getStatus() != sf3d::SoundSource::Status::Playing)
@@ -429,15 +445,6 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
         offhandTorch->setScale(sprite->getScale());
         offhandTorch->move(-handOffset.x*scale.x*1.25f, -sprite->getOrigin().y*2.5f);
         offhandTorch->move(scale.x*((offhandOffset.x*static_cast<float>((facing>0)?1.0f:2.5f))+2.5f-(static_cast<float>(offhandTorch->getTexture()->getSize().x)*static_cast<float>(facing)*0.5f)), scale.y*offhandOffset.y);
-        if (((facing > 0) != (mouse.x > sprite->getPosition().x)) || (mouse.y > (sprite->getPosition().y-(sprite->getOrigin().y))))
-        {
-            offhandTorch->setRotation(0.0f);
-        }
-        else
-        {
-            float angle = getAngle();
-            offhandTorch->setRotation(angle);
-        }
         offhandBriefcase->setColor(sf3d::Color::Transparent);
         offhandTorch->setColor(sf3d::Color::White);
     }
