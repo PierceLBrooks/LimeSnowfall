@@ -27,6 +27,7 @@ namespace LS
             bool pickup();
             bool drop();
             bool die();
+            bool hurt(Bullet* bullet);
             void go(const sf3d::Vector2i& movement);
             Game* getOwner() const;
             sf3d::Sprite* getSprite() const;

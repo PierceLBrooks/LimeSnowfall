@@ -16,6 +16,16 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     player = new Player(this);
     camera = new sf3d::Camera(75.0f, 0.001f, 1000.0f);
 
+    enemyImageLeft = new sf3d::Image();
+    enemyImageLeft->loadFromFile("./Assets/specops.png");
+    enemyImageLeft->flipHorizontally();
+    enemyImageRight = new sf3d::Image();
+    enemyImageRight->loadFromFile("./Assets/specops.png");
+    enemyTextureLeft = new sf3d::Texture();
+    enemyTextureLeft->loadFromImage(*enemyImageLeft);
+    enemyTextureRight = new sf3d::Texture();
+    enemyTextureRight->loadFromImage(*enemyImageRight);
+
     light = new sf3d::Light();
     light->setColor(sf3d::Color::White);
     light->setAmbientIntensity(0.25f);
@@ -86,7 +96,10 @@ LS::Game::Game(sf3d::RenderWindow* output, const sf3d::Vector2u& size)
     shaftBottom->setScale(15.0f, 15.0f, 15.0f);
     shaftBottom->setPosition(0.0f, 0.0f, 5.0f);
 
-    life = 1.0f;
+    life = 0.0f;
+    spawnLast = 0.0f;
+    spawn = 5.0f*pi;
+    spawner = 0.0f;
 
     view = output->getDefaultView();
 
@@ -183,6 +196,10 @@ LS::Game::~Game()
     delete ballRight;
     delete lightLeft;
     delete lightRight;
+    delete enemyTextureLeft;
+    delete enemyTextureRight;
+    delete enemyImageLeft;
+    delete enemyImageRight;
 }
 
 bool LS::Game::act(Action action)
@@ -294,6 +311,11 @@ bool LS::Game::playerDie()
     return true;
 }
 
+bool LS::Game::playerHurt(Bullet* bullet)
+{
+    return player->hurt(bullet);
+}
+
 bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
 {
     float gravity = 250.0f;
@@ -301,6 +323,52 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
     sf3d::Vector2f mouse = sf3d::Vector2f(sf3d::Mouse::getPosition(*output))+(sf3d::Vector2f(center.x, center.y)-(window->getView().getSize()*0.5f));
 
     life += deltaTime;
+    spawner += deltaTime;
+    if (spawner >= spawn)
+    {
+        float goal;
+        float axis = sinf(life*pi)*0.9f;
+        spawner -= spawn;
+        spawn += cosf(life*pi);
+        while (spawn < 0.0f)
+        {
+            spawn += pi;
+        }
+        spawn /= sqrtf(life)/pi;
+        spawn /= life-spawnLast;
+        std::cout << "spawn" << axis << std::endl;
+        goal = static_cast<float>(output->getSize().y)*0.5f;
+        goal -= fabsf(cosf((life*pi)+pi))*goal*0.75f;
+        axis *= static_cast<float>(output->getSize().x)*0.5f;
+        axis += static_cast<float>(output->getSize().x)*0.5f;
+        if (enemies.empty())
+        {
+            spawnLast = life;
+            if (sinf(life*pi) > 0.0f)
+            {
+                enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, player->getScale()));
+            }
+            else
+            {
+                enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, player->getScale()));
+            }
+        }
+        else
+        {
+            if (fabsf(enemies.back()->getPosition().x-axis) > static_cast<float>(player->getSprite()->getTextureRect().width))
+            {
+                spawnLast = life;
+                if (sinf(life*pi) > 0.0f)
+                {
+                    enemies.push_back(new Enemy(this, enemyTextureLeft, axis, goal, player->getScale()));
+                }
+                else
+                {
+                    enemies.push_back(new Enemy(this, enemyTextureRight, axis, goal, player->getScale()));
+                }
+            }
+        }
+    }
 
     this->window = window;
 
@@ -353,6 +421,27 @@ bool LS::Game::update(sf3d::RenderTexture* window, float deltaTime)
             bullets.erase(bullets.begin()+i);
             --i;
             continue;
+        }
+        if (bullets[i]->getOwner() != player)
+        {
+            if (playerHurt(bullets[i]))
+            {
+                std::cout << "hurt" << std::endl;
+                bullets.erase(bullets.begin()+i);
+                --i;
+                continue;
+            }
+            continue;
+        }
+        for (int j = 0; j != enemies.size(); ++j)
+        {
+            if (enemies[j]->hurt(bullets[i]))
+            {
+                std::cout << "shot" << std::endl;
+                bullets.erase(bullets.begin()+i);
+                --i;
+                break;
+            }
         }
     }
     for (int i = 0; i != enemies.size(); ++i)

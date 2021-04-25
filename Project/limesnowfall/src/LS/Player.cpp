@@ -221,6 +221,26 @@ bool LS::Player::die()
     return true;
 }
 
+bool LS::Player::hurt(Bullet* bullet)
+{
+    if (health <= 0)
+    {
+        return false;
+    }
+    float distance = sqrtf(powf(getPosition().x-bullet->getPosition().x, 2.0f)+powf(getPosition().y-bullet->getPosition().y, 2.0f));
+    std::cout << distance << std::endl;
+    if (distance > static_cast<float>(animationSize.x)*0.5f)
+    {
+        return false;
+    }
+    --health;
+    if (health <= 0)
+    {
+        die();
+    }
+    return true;
+}
+
 LS::Game* LS::Player::getOwner() const
 {
     return owner;
@@ -242,7 +262,7 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
         reload -= deltaTime;
     }
     this->mouse = mouse;
-    animation += deltaTime*static_cast<float>(animations[animationIndex].size());
+    animation += deltaTime*static_cast<float>(animations[animationIndex].size())*((briefcase)?0.75f:1.0f);
     if (airborne)
     {
         animationIndex = 2;
@@ -297,7 +317,7 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
     }
     else
     {
-        sprite->move(sf3d::Vector2f(movement)*deltaTime*speed);
+        sprite->move(sf3d::Vector2f(movement)*deltaTime*speed*((briefcase)?0.75f:1.0f));
     }
     if (sprite->getPosition().x-(0.5f*static_cast<float>(window->getSize().x)) > limit)
     {
@@ -354,6 +374,7 @@ bool LS::Player::update(sf3d::RenderTexture* window, float deltaTime, const sf3d
         motion = movement.x;
         movement = sf3d::Vector2i();
     }
+    setScale(sprite->getScale());
     setPosition(sprite->getPosition());
     move(sf3d::Vector3f(0.0f, -sprite->getOrigin().y*2.0f, 0.0f));
     return true;

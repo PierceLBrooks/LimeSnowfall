@@ -8,11 +8,14 @@
 
 namespace LS
 {
+    class Bullet;
+
     class Shooter : public sf3d::Transformable
     {
         public:
             Shooter();
             virtual ~Shooter();
+            virtual bool hurt(Bullet* bullet) = 0;
     };
 }
 

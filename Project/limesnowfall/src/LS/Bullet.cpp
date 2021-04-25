@@ -6,6 +6,7 @@
 
 LS::Bullet::Bullet(Shooter* owner, float angle) :
     Ownable<Shooter*>(),
+    sf3d::Transformable(),
     owner(owner),
     angle(angle)
 {
@@ -37,6 +38,8 @@ bool LS::Bullet::update(sf3d::RenderTexture* window, float deltaTime)
         return false;
     }
     shape->move(sf3d::Vector2f(cosf(angle), sinf(angle))*5000.0f*deltaTime);
+    setScale(shape->getSize());
+    setPosition(shape->getPosition());
     window->draw(*shape);
     return true;
 }

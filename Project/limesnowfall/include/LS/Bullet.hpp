@@ -11,7 +11,7 @@
 
 namespace LS
 {
-    class Bullet : public Ownable<Shooter*>
+    class Bullet : public Ownable<Shooter*>, public sf3d::Transformable
     {
         public:
             Bullet(Shooter* owner, float angle);

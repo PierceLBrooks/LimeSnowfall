@@ -47,6 +47,7 @@ namespace LS
             bool playerDrop();
             bool playerJump();
             bool playerDie();
+            bool playerHurt(Bullet* bullet);
             bool update(sf3d::RenderTexture* window, float deltaTime);
             sf3d::RenderWindow* getWindow() const;
             Player* getPlayer() const;
@@ -54,7 +55,14 @@ namespace LS
         protected:
             float pi;
             float life;
+            float spawnLast;
+            float spawn;
+            float spawner;
             Player* player;
+            sf3d::Image* enemyImageLeft;
+            sf3d::Image* enemyImageRight;
+            sf3d::Texture* enemyTextureLeft;
+            sf3d::Texture* enemyTextureRight;
             sf3d::RenderWindow* output;
             sf3d::RenderTexture* window;
             sf3d::Camera* camera;
